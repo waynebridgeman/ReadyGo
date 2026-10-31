@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101a27">
+<title>ReadyGo — Reaction Training</title>
+<style>
+:root{--bg:#0c1420;--panel:#142235;--panel2:#1b2c42;--ink:#f3f7fb;--muted:#9aabc0;--lime:#c8f36a;--red:#ff6b6b;--line:#2a3d55}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,#1b3047 0,#0c1420 45%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:760px;margin:auto;padding:20px 16px 48px}.top{display:flex;justify-content:space-between;align-items:center;margin:6px 0 22px}.brand{font-weight:950;letter-spacing:.08em;font-size:25px}.brand span{color:var(--lime)}.tag{font-size:11px;color:var(--lime);border:1px solid #607b36;border-radius:99px;padding:6px 10px;letter-spacing:.12em}
+h1{font-size:30px;line-height:1.05;margin:0 0 8px}p{color:var(--muted);line-height:1.5;margin:0}.intro{margin-bottom:20px}
+.panel{background:linear-gradient(145deg,#17283c,#101d2d);border:1px solid var(--line);border-radius:20px;padding:17px;margin:14px 0;box-shadow:0 14px 35px #0003}
+.label{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.13em;text-transform:uppercase;margin-bottom:9px}
+.segment{display:grid;grid-template-columns:1fr 1fr;gap:8px}.segment button,.secondary{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
+button,select{font:inherit;border-radius:12px;padding:13px 14px;border:0;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.segment button.active{background:#344b2a;border-color:#8eb34b;color:#e8ffba}
+.primary{background:var(--lime);color:#17220a;font-weight:900;width:100%;font-size:16px}.secondary{font-weight:700}.row{display:flex;gap:9px;align-items:center}.row>*{flex:1}
+select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);width:100%}
+.big{font-size:54px;font-weight:950;letter-spacing:-.04em;text-align:center;margin:10px 0 2px}.status{text-align:center;color:var(--muted);font-size:13px;min-height:20px}.go{color:var(--lime)}.bad{color:var(--red)}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.metric{background:#0d1928;border:1px solid var(--line);border-radius:14px;padding:13px 9px;text-align:center}.metric b{display:block;font-size:23px;margin-bottom:4px}.metric small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+video{width:100%;border-radius:14px;background:#050a10;max-height:300px;object-fit:cover;transform:scaleX(-1)}canvas{display:none}
+.note{font-size:12px;color:var(--muted);line-height:1.45}.check{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:13px;margin-top:10px}.check input{accent-color:var(--lime);width:18px;height:18px}
+.commands{display:flex;flex-wrap:wrap;gap:6px}.chip{font-size:11px;background:#20334a;border:1px solid #304963;color:#c3d0df;padding:6px 9px;border-radius:99px}
+.footer{text-align:center;color:#71849a;font-size:11px;margin-top:24px}
+@media(max-width:420px){main{padding:16px 12px 36px}.big{font-size:46px}.panel{padding:14px}.metrics{gap:6px}.metric b{font-size:20px}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><div class="brand">READY<span>GO</span></div><div class="tag">FIELD TEST · 0.1</div></div>
+  <div class="intro"><h1>Hear it. Recognize it. Hit it.</h1><p>Train your start response under referee commands and distractions. This is an early field-test prototype.</p></div>
+
+  <section class="panel">
+    <div class="label">Training mode</div>
+    <div class="segment"><button id="simBtn" class="active">Simulated referee</button><button id="liveBtn">Live referee</button></div>
+    <div style="height:15px"></div>
+    <div class="label">Referee voice</div>
+    <select id="voiceSelect" aria-label="Referee voice"></select>
+    <div style="height:13px"></div>
+    <div class="label">Session length</div>
+    <select id="roundSelect"><option value="5">5 starts · Quick test</option><option value="10" selected>10 starts · Standard</option><option value="20">20 starts · Endurance</option></select>
+    <label class="check"><input type="checkbox" id="crowdToggle"> Add crowd-style background noise (experimental)</label>
+  </section>
+
+  <section class="panel">
+    <div class="label">Camera movement tracking</div>
+    <video id="video" playsinline muted></video><canvas id="canvas"></canvas>
+    <div class="row" style="margin-top:10px"><button id="cameraBtn" class="secondary">Enable camera</button><button id="calibrateBtn" class="secondary" disabled>Calibrate</button></div>
+    <p class="note" id="cameraNote" style="margin-top:9px">Optional. Position the phone so your hand and forearm are visible. Camera tracking is a coarse movement indicator, not validated reaction-time instrumentation.</p>
+  </section>
+
+  <section class="panel">
+    <div class="label">Training sequence</div>
+    <div class="commands" id="commandList">
+      <span class="chip">CENTER</span><span class="chip">ELBOW DOWN</span><span class="chip">CLOSE YOUR HAND</span><span class="chip">THUMB</span><span class="chip">WRIST STRAIGHT</span><span class="chip">SHOULDERS SQUARE</span><span class="chip">DON'T MOVE</span>
+    </div>
+    <div class="big" id="display">READY?</div>
+    <div class="status" id="status">Choose a mode, then start a session.</div>
+    <div style="height:14px"></div>
+    <button id="startBtn" class="primary">START TRAINING</button>
+    <button id="liveGoBtn" class="primary" style="display:none;margin-top:9px">CALL GO</button>
+    <button id="stopBtn" class="secondary" style="display:none;width:100%;margin-top:9px">End session</button>
+  </section>
+
+  <section class="panel">
+    <div class="label">Session performance</div>
+    <div class="metrics">
+      <div class="metric"><b id="avg">—</b><small>Avg reaction</small></div>
+      <div class="metric"><b id="false">0</b><small>False starts</small></div>
+      <div class="metric"><b id="count">0/10</b><small>Valid starts</small></div>
+    </div>
+    <p class="note" id="resultNote" style="margin-top:11px">Reaction time is measured from the browser's GO speech-start event to detected camera motion, when camera tracking is enabled. Without the camera, tap CALL GO in live mode to test the referee workflow; motion scoring is unavailable.</p>
+  </section>
+  <div class="footer">READYGO v0.1 · Prototype for training experiments · Not an official referee or rules tool</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let mode='sim',stream=null,raf=null,baseline=null,goAt=null,session=false,waiting=false,round=0,total=10,times=[],falseStarts=0,noiseCtx=null,noiseSource=null,noiseGain=null,voiceList=[];
+const commands=['CENTER','ELBOW DOWN','CLOSE YOUR HAND','THUMB','WRIST STRAIGHT','SHOULDERS SQUARE',"DON'T MOVE",'KEEP YOUR WRIST','STAY CENTERED','HOLD YOUR POSITION','ADJUST YOUR GRIP','WAIT'];
+const video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
+function setStatus(t,cls=''){ $('status').textContent=t;$('status').className='status '+cls; }
+function loadVoices(){voiceList=speechSynthesis.getVoices();const sel=$('voiceSelect');const old=sel.value;sel.innerHTML='';let list=voiceList.filter(v=>v.lang.toLowerCase().startsWith('en'));if(!list.length)list=voiceList;list.forEach((v,i)=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name+' · '+v.lang;sel.appendChild(o)});if(old&&[...sel.options].some(o=>o.value===old))sel.value=old;}
+speechSynthesis.onvoiceschanged=loadVoices;loadVoices();
+function speak(text,cb){if(!('speechSynthesis'in window)){setStatus('Speech synthesis is not available in this browser.','bad');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);const v=voiceList.find(x=>x.name===$('voiceSelect').value);if(v)u.voice=v;u.rate=0.92;u.pitch=1;u.onstart=()=>{if(cb)cb(performance.now())};speechSynthesis.speak(u);}
+function updateMetrics(){ $('avg').textContent=times.length?Math.round(times.reduce((a,b)=>a+b,0)/times.length)+' ms':'—';$('false').textContent=falseStarts;$('count').textContent=times.length+'/'+total;}
+function startNoise(){if(!$('crowdToggle').checked)return;try{noiseCtx=new (window.AudioContext||window.webkitAudioContext)();const n=noiseCtx.sampleRate*2;const b=noiseCtx.createBuffer(1,n,noiseCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*0.12;noiseSource=noiseCtx.createBufferSource();noiseSource.buffer=b;noiseSource.loop=true;noiseGain=noiseCtx.createGain();noiseGain.gain.value=.13;noiseSource.connect(noiseGain).connect(noiseCtx.destination);noiseSource.start()}catch(e){}}
+function stopNoise(){try{noiseSource&&noiseSource.stop();noiseCtx&&noiseCtx.close()}catch(e){}noiseSource=null;noiseCtx=null;}
+function frame(){if(!stream||video.readyState<2)return;canvas.width=80;canvas.height=60;ctx.drawImage(video,0,0,80,60);const data=ctx.getImageData(0,0,80,60).data;let diff=0;if(baseline){for(let i=0;i<data.length;i+=4)diff+=Math.abs(data[i]-baseline[i])+Math.abs(data[i+1]-baseline[i+1])+Math.abs(data[i+2]-baseline[i+2]);diff/=data.length/4;if(waiting&&diff>18){if(goAt===null)falseStart();else registerMotion(performance.now(),'camera')}}baseline=new Uint8ClampedArray(data);raf=requestAnimationFrame(frame);}
+async function enableCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});video.srcObject=stream;await video.play();$('cameraBtn').textContent='Camera enabled';$('calibrateBtn').disabled=false;$('cameraNote').textContent='Camera active. Keep the phone still and keep your hand/forearm in frame. Tap Calibrate while holding your start position.';baseline=null;frame()}catch(e){$('cameraNote').textContent='Camera unavailable: '+e.message+'. Use HTTPS and allow camera access.'}}
+function calibrate(){if(!stream){setStatus('Enable the camera first.');return;}baseline=null;setStatus('Calibration captured. Hold your start position.');$('calibrateBtn').textContent='Recalibrate';}
+function registerMotion(t,source){if(!waiting)return;waiting=false;const ms=Math.max(0,Math.round(t-goAt));times.push(ms);setStatus('Movement detected · '+ms+' ms','go');$('display').textContent=ms+' ms';updateMetrics();setTimeout(nextRound,1200);}
+function falseStart(){if(!waiting||goAt!==null)return;falseStarts++;waiting=false;$('display').textContent='EARLY';setStatus('Movement before GO — false start','bad');updateMetrics();setTimeout(nextRound,1200);}
+function armGo(){if(!session)return;waiting=true;goAt=null;baseline=null;$('display').textContent='LISTEN';setStatus('Wait for the start command…');}
+function doGo(){if(!session||!waiting)return;const mark=t=>{goAt=t;setStatus('GO! HIT!','go');$('display').textContent='GO!';if(!stream){setStatus('GO called. Enable camera to score movement.','go');setTimeout(nextRound,1100)}};if(mode==='sim'){speak('Go!',mark)}else{mark(performance.now())}}
+function nextRound(){if(!session)return;round++;if(round>=total){finish();return;}playSequence();}
+function playSequence(){if(!session)return;waiting=false;goAt=null;$('display').textContent='SETUP';let i=0;const n=2+Math.floor(Math.random()*4);function sayNext(){if(!session)return;if(i>=n){const delay=850+Math.random()*2600;setTimeout(()=>{if(!session)return;armGo();if(mode==='sim')setTimeout(doGo,500+Math.random()*900);},delay);return;}const c=commands[Math.floor(Math.random()*commands.length)];$('display').textContent=c;speak(c,()=>{});i++;setTimeout(sayNext,950+Math.random()*950);}sayNext();}
+function begin(){if(session)return;total=+$('roundSelect').value;round=0;times=[];falseStarts=0;session=true;updateMetrics();$('startBtn').style.display='none';$('stopBtn').style.display='block';$('liveGoBtn').style.display=mode==='live'?'block':'none';startNoise();if(mode==='sim'){setStatus('Simulated referee session started.');playSequence()}else{setStatus('Live referee mode. Partner calls commands; tap CALL GO at the exact spoken start.');armGo();}}
+function finish(){session=false;waiting=false;stopNoise();$('startBtn').style.display='block';$('stopBtn').style.display='none';$('liveGoBtn').style.display='none';$('display').textContent='SESSION DONE';setStatus('Session complete. Review your results below.');}
+function end(){if(!session)return;finish();}
+$('simBtn').onclick=()=>{if(session)return;mode='sim';$('simBtn').classList.add('active');$('liveBtn').classList.remove('active');$('liveGoBtn').style.display='none';setStatus('Simulated referee mode selected.')};
+$('liveBtn').onclick=()=>{if(session)return;mode='live';$('liveBtn').classList.add('active');$('simBtn').classList.remove('active');$('liveGoBtn').style.display='none';setStatus('Live referee mode selected.')};
+$('cameraBtn').onclick=enableCamera;$('calibrateBtn').onclick=calibrate;$('startBtn').onclick=begin;$('stopBtn').onclick=end;
+$('liveGoBtn').onclick=()=>{if(!session){return;}if(!waiting){armGo();return;}doGo();};
+$('display').addEventListener('click',()=>{if(session&&waiting&&goAt===null)falseStart()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&session)end()});
+updateMetrics();
+</script>
+</body></html>
