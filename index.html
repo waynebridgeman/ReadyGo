@@ -101,7 +101,7 @@ const REF01_IDS=[1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20];
 const ref01=new Map();let lastGoId=null, audioCtx=null, activeGoSource=null, goToken=0;
 async function preloadRef01(){
  try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();
-  await Promise.all(REF01_IDS.map(async id=>{const name=`GO${String(id).padStart(2,'0')}_trimmed.wav`;try{const res=await fetch(`audio/ref01/${name}`);if(!res.ok)throw Error(res.status);const data=await res.arrayBuffer();ref01.set(id,await audioCtx.decodeAudioData(data))}catch(e){console.warn('REF01 missing:',name,e)}}));
+  await Promise.all(REF01_IDS.map(async id=>{const name=`GO${String(id).padStart(2,'0')}.wav`;try{const res=await fetch(`audio/ref01/${name}`);if(!res.ok)throw Error(res.status);const data=await res.arrayBuffer();ref01.set(id,await audioCtx.decodeAudioData(data))}catch(e){console.warn('REF01 missing:',name,e)}}));
  }catch(e){console.warn('REF01 audio unavailable',e)}
 }
 function playRecordedGo(){
@@ -111,7 +111,7 @@ function playRecordedGo(){
  const src=audioCtx.createBufferSource();src.buffer=ref01.get(id);src.connect(audioCtx.destination);
  const onset=audioCtx.currentTime+.035;src.start(onset);activeGoSource=src;
  const token=++goToken;const expected=performance.now()+35;
- setTimeout(()=>{if(!running||token!==goToken||!trialActive&&mode==='camera')return;goAt=expected;goFired=true;state(words().go,'go');$('commandText').textContent=words().go;},35);
+ setTimeout(()=>{if(!running||token!==goToken||(!trialActive&&mode==='camera'))return;goAt=expected;goFired=true;state(words().go,'go');$('commandText').textContent=words().go;},35);
  return true;
 }
 
