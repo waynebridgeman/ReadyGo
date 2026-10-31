@@ -22,7 +22,7 @@ h1{font-size:clamp(30px,7vw,44px);line-height:1;margin:0 0 9px;font-weight:950;l
 </style>
 </head>
 <body><main>
-<header class="top"><div class="brand">READY<span>GO</span></div><div class="version">FIELD TEST · 0.3</div></header>
+<header class="top"><div class="brand">READY<span>GO</span></div><div class="version">FIELD TEST · 0.3.1</div></header>
 <section class="intro"><div class="eyebrow">Armwrestling start-response training</div><h1>Hear it. Recognize it. <em>Hit it.</em></h1><p>Train the start—not a predictable countdown. Referees repeat commands, interrupt progression, and keep athletes honest before GO.</p></section>
 
 <section class="panel">
@@ -62,7 +62,7 @@ h1{font-size:clamp(30px,7vw,44px);line-height:1;margin:0 0 9px;font-weight:950;l
  <div class="log" id="history"><div class="logrow"><span>Session history</span><span>Results appear here</span></div></div>
  <p class="hint">Movement scoring in this prototype uses a manual response button. Camera-based hand/forearm tracking and calibrated acoustic onset measurement are planned for the next technical milestone.</p>
 </section>
-<footer class="footer">READYGO v0.3 · Experimental prototype · Not an official referee or rules tool</footer>
+<footer class="footer">READYGO v0.3.1 · Experimental prototype · Not an official referee or rules tool</footer>
 </main>
 <script>
 const $=id=>document.getElementById(id);
@@ -113,7 +113,7 @@ function runTrial(){
  step();
 }
 function callGo(){if(!session)return;waiting=true;show('OFFICIAL START','GO!','go');goTime=performance.now();say('GO!',()=>{});$('partnerGo').style.display='block';later(()=>{if(waiting){waiting=false;show('MISSED START','NO RESPONSE','bad');status('No response registered.');nextTrial()}},2200)}
-function respond(){if(!session)return;if(!waiting){falseStarts++;if(mode==='progressive'&&adaptiveLevel>1)adaptiveLevel--;show('FALSE START','TOO EARLY','bad');status('False start recorded. Wait for the referee’s GO.'+(mode==='progressive'?' Difficulty adjusted to Level '+adaptiveLevel+'.':''));update();return}const ms=Math.round(performance.now()-goTime);waiting=false;valid++;reactionTimes.push(ms);if(mode==='progressive'&&valid%3===0&&falseStarts===0&&adaptiveLevel<5){adaptiveLevel++;status('Three clean starts. Difficulty increased to Level '+adaptiveLevel+'.')}else{status('Start response recorded.')}show('VALID START',ms+' ms','go');update();later(nextTrial,1100)}
+function respond(){if(!session)return;if(!waiting){falseStarts++;if(mode==='progressive'&&adaptiveLevel>1)adaptiveLevel--;show('FALSE START','TOO EARLY','bad');status('False start recorded. Wait for the referee GO.'+(mode==='progressive'?' Difficulty adjusted to Level '+adaptiveLevel+'.':''));update();return}const ms=Math.round(performance.now()-goTime);waiting=false;valid++;reactionTimes.push(ms);if(mode==='progressive'&&valid%3===0&&falseStarts===0&&adaptiveLevel<5){adaptiveLevel++;status('Three clean starts. Difficulty increased to Level '+adaptiveLevel+'.')}else{status('Start response recorded.')}show('VALID START',ms+' ms','go');update();later(nextTrial,1100)}
 function nextTrial(){if(!session)return;trial++;if(trial>=total){finish();return}later(runTrial,850)}
 function begin(){if(session)return;adaptiveLevel=+$('difficulty').value;session=true;trial=0;valid=0;falseStarts=0;repeats=0;reactionTimes=[];total=+$('rounds').value;update();$('start').style.display='none';$('stop').style.display='block';playAmbient();status('Session started. Tap the central training area only when you hear GO.');runTrial()}
 function finish(){session=false;waiting=false;clearTimers();stopAmbient();speechSynthesis.cancel();$('start').style.display='block';$('stop').style.display='none';$('partnerGo').style.display='none';show('SESSION COMPLETE','REVIEW RESULTS');status('Session complete. Adjust your training and run it again.');$('history').innerHTML=`<div class="logrow"><span>Mode / referee</span><span>${mode==='progressive'?'Progressive':'Competition'} · ${style==='strict'?'Strict':'Aggressive'}</span></div><div class="logrow"><span>Valid starts / false starts</span><span>${valid} / ${falseStarts}</span></div><div class="logrow"><span>Repeated commands</span><span>${repeats}</span></div>`;update()}
