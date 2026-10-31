@@ -108,10 +108,10 @@ function playRecordedGo(){
  if(!running)return false;
  const ids=REF01_IDS.filter(id=>ref01.has(id)&&id!==lastGoId);if(!ids.length)return false;
  const id=ids[Math.floor(Math.random()*ids.length)];lastGoId=id;
- const src=audioCtx.createBufferSource();src.buffer=ref01.get(id);src.connect(audioCtx.destination);
+ if('speechSynthesis'in window)speechSynthesis.cancel();const src=audioCtx.createBufferSource();src.buffer=ref01.get(id);src.connect(audioCtx.destination);
  const onset=audioCtx.currentTime+.035;src.start(onset);activeGoSource=src;
  const token=++goToken;const expected=performance.now()+35;
- setTimeout(()=>{if(!running||token!==goToken||(!trialActive&&mode==='camera'))return;goAt=expected;goFired=true;state(words().go,'go');$('commandText').textContent=words().go;},35);
+ setTimeout(()=>{if(!running||token!==goToken||(!trialActive&&mode==='camera'))return;goAt=expected;goFired=true;state(words().go,'go');$('commandText').textContent=words().go;if(mode==='audio'){setStatus('GO delivered. Listen and hit; no reaction-time scoring.');finishTrial('Trial complete.');}},35);
  return true;
 }
 
@@ -167,7 +167,7 @@ function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w
 function speak(text,isGo=false){
  if(!('speechSynthesis'in window)){setStatus('Speech synthesis is unavailable in this browser.');return}
  const u=new SpeechSynthesisUtterance(text);u.lang=$('language').value==='ru'?'ru-RU':'en-US';u.rate=isGo?1.08:(.88+Math.random()*.24);u.pitch=.9+Math.random()*.2;u.volume=1;
- if(isGo){u.onstart=()=>{if(!running)return;goAt=performance.now();goFired=true;state(words().go,'go');$('commandText').textContent=words().go};}
+ if(isGo){u.onstart=()=>{if(!running)return;goAt=performance.now();goFired=true;state(words().go,'go');$('commandText').textContent=words().go;if(mode==='audio'){setStatus('GO delivered. Listen and hit; no reaction-time scoring.');finishTrial('Trial complete.')}};}
  speechSynthesis.speak(u);
 }
 function noiseStart(){noiseStop();const level=$('noise').value;if(level==='off')return;try{const ac=new(window.AudioContext||window.webkitAudioContext)();const buffer=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1);const src=ac.createBufferSource();src.buffer=buffer;src.loop=true;const filter=ac.createBiquadFilter();filter.type='lowpass';filter.frequency.value=level==='low'?500:1100;const gain=ac.createGain();gain.gain.value=level==='low'?.012:.025;src.connect(filter);filter.connect(gain);gain.connect(ac.destination);src.start();noiseNode={src,ac};}catch(e){}}
@@ -189,7 +189,7 @@ function scheduleTrial(){
  trialActive=mode==='camera';goFired=false;goAt=0;state('LISTEN','ready');$('commandText').textContent='LISTEN';setStatus('Listen carefully. Do not anticipate the start.');
  const seq=commandSequence();let idx=0;
  function sayNext(){if(!running)return;if(idx<seq.length){const c=seq[idx++];$('commandText').textContent=c;if(c===words().ready)repeated++;speak(c);sequenceTimer=setTimeout(sayNext,650+Math.random()*(style==='aggressive'?1050:1500));}
- else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;if(!playRecordedGo())speak(words().go,true);if(mode==='audio'){setStatus('GO delivered. Audio-only practice: focus on recognition and disciplined response; no movement score.');finishTrial('Trial complete.');}else{setStatus('GO. Move from your calibrated ready position.');setTimeout(()=>{if(running&&trialActive&&goFired){missed++;trialActive=false;missedCheck();}},2200)}} ,delay)}
+ else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;if(!playRecordedGo())speak(words().go,true);if(mode==='camera'){setStatus('GO pending. Move only when you hear the command.');setTimeout(()=>{if(running&&trialActive&&goFired){missed++;trialActive=false;missedCheck();}},2600)}} ,delay)}
  }
  sayNext();
 }
