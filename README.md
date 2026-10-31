@@ -1,4 +1,4 @@
-READYGO v0.4 — Integrated prototype
+READYGO v0.4.1 — Integrated prototype
 
 WHAT'S NEW
 - Brings the training engine and camera mode together.
