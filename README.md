@@ -1,23 +1,28 @@
-# ReadyGo v0.3 — Safari/GitHub Pages prototype
+READYGO v0.4 — Integrated prototype
 
-## What's new
-- Separate Progressive Training and Competition Simulation modes.
-- Strict Progression and Aggressive Referee styles selectable in either mode.
-- Command-sequence variation with repeated instructions and returns to earlier commands.
-- Variable pauses before GO.
-- Session summary with valid starts, false starts, average response time, and repeated commands.
-- Experimental generated ambient noise.
+WHAT'S NEW
+- Brings the training engine and camera mode together.
+- Progressive Training and Competition Simulation.
+- Strict Progression and Aggressive Referee styles.
+- Stateful command sequences with repeats and returns to earlier setup commands.
+- Camera Mode with ready-position calibration and hand landmark tracking (MediaPipe loaded from a CDN).
+- Experimental frame-motion fallback if the hand landmark model cannot load.
+- Audio-only mode for auditory discipline; it does not score physical reaction time or false starts.
+- English command audio plus a multilingual language selector scaffold.
 
-## Install on GitHub Pages
-1. Download and unzip this package.
-2. Open your `waynebridgeman/ReadyGo` GitHub repository.
-3. Upload the included `index.html` to the repository root, replacing the existing file.
-4. Commit the change.
-5. Wait for GitHub Pages to redeploy, then refresh https://waynebridgeman.github.io/ReadyGo/
+IMPORTANT LIMITATIONS
+- Browser speech synthesis is still a temporary voice placeholder, not authentic referee recordings.
+- Generated background noise is not real competition crowd audio.
+- Camera tracking is a prototype, not a certified measurement system. Results depend on camera angle, lighting, device performance, and hand visibility.
+- Reaction timing is referenced to the browser speech-synthesis start event, not verified acoustic onset. Do not treat it as competition-grade timing.
+- Only English command flow is fully implemented in this prototype. Other language selections are scaffolding and need native referee validation.
+- The fallback motion detector is experimental and is not hand/wrist tracking.
+- MediaPipe requires internet access in the browser to load its model assets.
 
-## Important prototype limitations
-- Speech is browser text-to-speech, not authentic recorded referee audio.
-- The response is currently recorded by tapping the training panel / Partner Calls GO button. Camera hand/forearm tracking is not included in this v0.3 build.
-- Ambient sound is generated texture, not a real crowd recording.
-- Command sequences are experimental simulations, not official federation rule implementations. Validate commands and progression with referees before using as a rules-accurate simulator.
-- Reaction times are prototype estimates, not competition-grade measurements.
+DEPLOY
+1. Extract the ZIP.
+2. Upload index.html to the root of your existing GitHub Pages repository, replacing the old index.html.
+3. Commit the change.
+4. Wait for the Pages deployment to complete, then hard-refresh the site (Ctrl+Shift+R).
+
+For camera access, use the HTTPS GitHub Pages URL and allow camera permission.
