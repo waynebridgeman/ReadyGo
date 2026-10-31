@@ -196,8 +196,8 @@ function scheduleTrial(){
 function missedCheck(){state('NO RESPONSE','bad');finishTrial('No movement detected after GO. Review your position and prepare for the next trial.')}
 function startSession(){
  if(running)return;total=Number($('length').value);if(mode==='camera'&&(!stream||!calibrated)){setStatus('Camera Mode requires an enabled camera and a ready-position calibration.');return}
- running=true;preloadRef01();trial=valid=falseStarts=missed=repeated=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
- ['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=true);noiseStart();scheduleTrial();
+ running=true;trial=valid=falseStarts=missed=repeated=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
+ ['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=true);noiseStart();setStatus('Loading REF01 audio…');preloadRef01().then(()=>{if(running)scheduleTrial()});
 }
 function nextTrial(){if(!running)return;if(trial>=total){endSession();return}scheduleTrial()}
 function endSession(){
