@@ -1,127 +1,193 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090b10">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#090b0e">
 <title>ReadyGo — Hear it. Recognize it. Hit it.</title>
 <style>
-:root{--bg:#090b10;--panel:#141821;--panel2:#1d2430;--ink:#f4f6fa;--muted:#9ba5b5;--red:#ff303b;--red2:#a90e19;--line:#303846;--green:#b8f36b}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#3a1118 0,#151018 32%,#090b10 68%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-main{max-width:850px;margin:auto;padding:20px 15px 48px}.top{display:flex;align-items:center;justify-content:space-between;margin:4px 0 25px}.brand{font-size:27px;font-weight:1000;letter-spacing:.06em;font-style:italic}.brand span{color:var(--red)}.version{font-size:10px;letter-spacing:.14em;border:1px solid #71313a;color:#ff8c93;padding:7px 10px;border-radius:30px}
-h1{font-size:clamp(30px,7vw,44px);line-height:1;margin:0 0 9px;font-weight:950;letter-spacing:-.04em}h1 em{font-style:normal;color:var(--red)}p{color:var(--muted);line-height:1.5;margin:0}.intro{margin-bottom:20px}.eyebrow,.label{font-size:10px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:#b5bdc9;margin-bottom:10px}
-.panel{background:linear-gradient(145deg,#191e28,#10141c);border:1px solid var(--line);border-radius:19px;padding:17px;margin:13px 0;box-shadow:0 14px 35px #0005}
-.modes{display:grid;grid-template-columns:1fr 1fr;gap:9px}.choice{background:#1c222d;color:var(--ink);border:1px solid #394252;border-radius:14px;padding:14px;text-align:left;min-height:105px}.choice strong{display:block;font-size:15px;margin-bottom:6px}.choice small{display:block;color:var(--muted);font-size:11px;line-height:1.4}.choice.active{border-color:var(--red);background:linear-gradient(145deg,#42171e,#24151b);box-shadow:inset 0 0 0 1px #ff303b55}.choice.active strong{color:#fff}
-.segment{display:grid;grid-template-columns:1fr 1fr;gap:8px}.segment button,select,.secondary{background:var(--panel2);color:var(--ink);border:1px solid #3a4351;border-radius:11px;padding:12px;font:inherit}.segment button.active{border-color:var(--red);background:#40171d;color:#fff}.primary{width:100%;background:linear-gradient(100deg,#ff414b,#c50d1b);color:white;border:0;border-radius:12px;padding:15px;font-weight:950;font-size:16px;letter-spacing:.04em;box-shadow:0 7px 20px #b80d1d44}.secondary{font-weight:750}.row{display:flex;gap:9px}.row>*{flex:1}select{width:100%}.field{margin-top:14px}.hint{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}
-.screen{background:#080b11;border:1px solid #3b4657;border-radius:17px;padding:18px 12px;text-align:center;margin:14px 0}.screen .state{font-size:10px;letter-spacing:.18em;color:#a7b0bd;font-weight:900}.screen .command{font-size:clamp(34px,9vw,58px);font-weight:1000;letter-spacing:-.04em;margin:15px 0 6px;min-height:65px}.screen .sub{font-size:12px;color:var(--muted);min-height:18px}.screen.go .command{color:var(--green)}.screen.bad .command{color:#ff646c}
-.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{background:#0c1017;border:1px solid #303846;border-radius:12px;padding:12px 6px;text-align:center}.metric b{font-size:21px;display:block}.metric small{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{font-size:10px;background:#222b38;border:1px solid #3b4657;color:#d2d8e1;padding:7px 9px;border-radius:30px}.chip.repeat{border-color:#ad3b45;color:#ff9da3}.chip.go{border-color:#729a3f;color:var(--green)}
-.log{display:grid;gap:6px;margin-top:10px}.logrow{display:flex;justify-content:space-between;gap:10px;background:#0c1017;border:1px solid #293240;border-radius:9px;padding:9px 10px;font-size:11px}.logrow span:last-child{color:var(--muted);text-align:right}
-.footer{text-align:center;color:#687384;font-size:10px;margin-top:24px;line-height:1.5}
-@media(max-width:520px){main{padding:16px 12px 35px}.panel{padding:14px}.metrics{grid-template-columns:repeat(2,1fr)}.modes{grid-template-columns:1fr 1fr}.choice{padding:11px;min-height:112px}}
+:root{--bg:#090b0e;--panel:#12161c;--panel2:#191f27;--line:#2a323d;--white:#f2f4f7;--muted:#9aa5b2;--red:#ed2939;--red2:#a81422;--green:#45d483;--amber:#f4bd4f}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1b222c 0,#090b0e 58%);color:var(--white);font-family:Inter,Segoe UI,Arial,sans-serif;min-height:100vh}
+.wrap{max-width:1180px;margin:auto;padding:22px 18px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px}
+.brand{font-weight:950;letter-spacing:.08em;font-size:27px}.brand span{color:var(--red)}.tag{font-size:11px;letter-spacing:.22em;color:var(--muted);margin-top:3px}
+.pill{border:1px solid var(--line);border-radius:30px;padding:8px 12px;color:var(--muted);font-size:11px;letter-spacing:.12em}
+h1{font-size:clamp(27px,4vw,43px);line-height:1.02;margin:12px 0 8px;font-weight:900;letter-spacing:-.035em}h1 em{font-style:normal;color:var(--red)}
+.sub{color:var(--muted);max-width:700px;line-height:1.5;margin:0 0 22px}
+.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(300px,.85fr);gap:16px}
+.panel{background:linear-gradient(150deg,rgba(25,31,39,.97),rgba(14,18,23,.98));border:1px solid var(--line);border-radius:16px;padding:17px;box-shadow:0 12px 35px #0005}
+.panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.16em;margin:0 0 14px;color:#dce2e9}
+.videoWrap{position:relative;background:#030405;border-radius:12px;overflow:hidden;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;border:1px solid #303945}
+video{width:100%;height:100%;object-fit:cover;display:none;transform:scaleX(-1)}
+#overlay{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;transform:scaleX(-1)}
+.placeholder{padding:24px;text-align:center;color:#8d98a5}.placeholder strong{display:block;color:#e8edf2;font-size:18px;margin-bottom:8px}
+.cameraHUD{position:absolute;left:12px;right:12px;top:12px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}
+.hud{font-size:10px;letter-spacing:.12em;text-transform:uppercase;background:#05070bd9;border:1px solid #ffffff20;padding:7px 9px;border-radius:6px;color:#dbe2ea}
+.state{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:clamp(24px,5vw,52px);font-weight:1000;letter-spacing:.06em;text-shadow:0 4px 18px #000;white-space:nowrap;text-align:center}
+.state.go{color:var(--green)}.state.bad{color:var(--red)}.state.ready{color:white}
+.videoFoot{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button,select{background:#202832;color:#f3f5f8;border:1px solid #394451;border-radius:8px;padding:11px 13px;font-weight:700;font-size:12px;cursor:pointer}
+button:hover{border-color:#758394}button.primary{background:var(--red);border-color:var(--red);color:white}button.primary:hover{background:#ff3c4b}button:disabled{opacity:.4;cursor:not-allowed}
+.controls{display:grid;gap:12px}.field label{display:block;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.13em;margin-bottom:6px}.field select{width:100%}
+.segment{display:grid;grid-template-columns:1fr 1fr;gap:7px}.segment button{padding:12px 8px}.segment button.active{background:#41151c;border-color:var(--red);color:#fff}
+.note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:6px}
+.divider{height:1px;background:var(--line);margin:4px 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#0c1015;border:1px solid #252d37;border-radius:9px;padding:11px}.stat small{display:block;color:var(--muted);font-size:9px;letter-spacing:.12em;text-transform:uppercase}.stat strong{font-size:23px;display:block;margin-top:5px;font-variant-numeric:tabular-nums}
+.commandBox{background:#0a0d11;border:1px solid #252d37;border-radius:10px;padding:15px;text-align:center}.commandBox small{color:var(--muted);font-size:9px;letter-spacing:.17em}.commandBox strong{display:block;font-size:25px;letter-spacing:.06em;margin-top:5px;min-height:30px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.wide{grid-column:1/-1}
+.progress{height:5px;background:#252d37;border-radius:8px;overflow:hidden}.progress>div{height:100%;background:var(--red);width:0%;transition:width .2s}
+.statusline{font-size:11px;color:var(--muted);min-height:17px;line-height:1.4}
+.hidden{display:none!important}
+footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-height:1.5}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.wrap{padding:15px 12px 35px}.top{align-items:flex-start}.pill{max-width:135px;text-align:center}}
 </style>
 </head>
-<body><main>
-<header class="top"><div class="brand">READY<span>GO</span></div><div class="version">FIELD TEST · 0.3.1</div></header>
-<section class="intro"><div class="eyebrow">Armwrestling start-response training</div><h1>Hear it. Recognize it. <em>Hit it.</em></h1><p>Train the start—not a predictable countdown. Referees repeat commands, interrupt progression, and keep athletes honest before GO.</p></section>
-
-<section class="panel">
- <div class="label">Choose your training mode</div>
- <div class="modes">
-  <button class="choice active" id="progressive"><strong>Progressive Training</strong><small>Build recognition, consistency, and discipline through adaptive levels.</small></button>
-  <button class="choice" id="competition"><strong>Competition Simulation</strong><small>Unpredictable referee sequences, voice delivery, timing, and pressure.</small></button>
+<body>
+<div class="wrap">
+ <header class="top"><div><div class="brand">READY<span>GO</span></div><div class="tag">HEAR IT. RECOGNIZE IT. HIT IT.</div></div><div class="pill">TRAINING BUILD · v0.4</div></header>
+ <h1>Train the <em>recognition.</em><br>Own the start.</h1>
+ <p class="sub">A referee-start training environment for armwrestlers. Learn to listen, stay disciplined through setup changes, and respond when the GO actually comes.</p>
+ <div class="layout">
+  <section class="panel">
+   <h2 id="visualTitle">Camera training · live tracking</h2>
+   <div class="videoWrap" id="videoWrap">
+    <video id="video" playsinline muted></video><canvas id="overlay"></canvas>
+    <div class="placeholder" id="placeholder"><strong>CAMERA READY</strong>Enable your camera to calibrate your ready position and train movement response.</div>
+    <div class="cameraHUD"><span class="hud" id="trackingBadge">TRACKING · OFF</span><span class="hud" id="trialBadge">TRIAL 0 / 10</span></div>
+    <div class="state ready" id="stateText">READY?</div>
+   </div>
+   <div class="videoFoot" id="cameraButtons">
+    <button id="cameraBtn" class="primary">Enable camera</button><button id="calibrateBtn" disabled>Calibrate ready position</button><button id="recenterBtn" disabled>Reset calibration</button>
+   </div>
+   <div class="videoFoot hidden" id="audioModeMessage"><span class="note">AUDIO-ONLY SESSION · Camera and movement scoring are off. Focus on command recognition, patience, and disciplined response.</span></div>
+   <div class="note" id="cameraNote">Camera mode uses hand landmarks when available. Keep your hand visible and still in the ready position during calibration.</div>
+  </section>
+  <aside class="panel">
+   <h2>Session setup</h2>
+   <div class="controls">
+    <div class="field"><label>Measurement mode</label><div class="segment"><button id="cameraMode" class="active">Camera mode</button><button id="audioMode">Audio-only</button></div><div class="note" id="modeNote">Physical movement, false starts and response timing are measured from camera tracking.</div></div>
+    <div class="field"><label>Training mode</label><div class="segment"><button id="progressive" class="active">Progressive training</button><button id="competition">Competition simulation</button></div></div>
+    <div class="field"><label>Referee style</label><div class="segment"><button id="strict" class="active">Strict progression</button><button id="aggressive">Aggressive referee</button></div></div>
+    <div class="field"><label>Language</label><select id="language"><option value="en">English</option><option value="ru">Russian</option><option value="tr">Turkish</option><option value="ro">Romanian</option><option value="pl">Polish</option><option value="ka">Georgian</option><option value="uk">Ukrainian</option><option value="de">German</option><option value="fr">French</option><option value="es">Spanish</option><option value="it">Italian</option><option value="pt">Portuguese</option></select><div class="note">English command set is active in this prototype. Additional language packs require native referee validation and recordings.</div></div>
+    <div class="field"><label>Session length</label><select id="length"><option value="5">5 trials · quick set</option><option value="10" selected>10 trials · standard</option><option value="15">15 trials · extended</option></select></div>
+    <div class="field"><label>Audio environment</label><select id="noise"><option value="off">Clean audio</option><option value="low">Low background noise</option><option value="medium">Moderate background noise</option></select><div class="note">Generated ambient noise is a placeholder, not authentic competition crowd audio.</div></div>
+    <div class="divider"></div>
+    <div class="commandBox"><small>REFEREE COMMAND</small><strong id="commandText">WAITING</strong></div>
+    <div class="actions"><button id="startBtn" class="primary wide">Start session</button><button id="nextBtn" disabled>Next trial</button><button id="stopBtn" disabled>End session</button></div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <div class="statusline" id="status">Select a mode, enable the camera if using Camera Mode, then start.</div>
+   </div>
+  </aside>
  </div>
- <div class="field"><div class="label">Referee style</div><div class="segment"><button class="active" id="strict">Strict Progression</button><button id="aggressive">Aggressive Referee</button></div><p class="hint" id="styleHint">Rules-based flow with realistic corrections and occasional repeated instructions.</p></div>
- <div class="field" id="difficultyField"><div class="label">Difficulty</div><select id="difficulty"><option value="1">Level 1 · Foundation</option><option value="2">Level 2 · Recognition</option><option value="3">Level 3 · Timing</option><option value="4">Level 4 · Distraction</option><option value="5">Level 5 · Pressure</option></select></div>
- <div class="field"><div class="label">Session length</div><select id="rounds"><option value="5">5 trials · Quick session</option><option value="10" selected>10 trials · Standard session</option><option value="20">20 trials · Endurance session</option></select></div>
- <div class="field"><label class="hint"><input type="checkbox" id="noise" checked> Enable experimental ambient noise</label><input id="volume" type="range" min="0" max="100" value="35" style="width:100%;accent-color:#ff303b"><p class="hint">Generated sound texture only; authentic crowd recordings will replace this placeholder.</p></div>
-</section>
-
-<section class="panel">
- <div class="label">Referee command sequence</div>
- <div class="chips" id="sequence"><span class="chip">READY</span><span class="chip">CENTER</span><span class="chip">ELBOW DOWN</span><span class="chip">SET</span><span class="chip go">GO</span></div>
- <p class="hint" id="sequenceHint">The referee may repeat a command or return to an earlier instruction before allowing the start.</p>
-</section>
-
-<section class="panel">
- <div class="label">Live training</div>
- <div class="screen" id="screen"><div class="state" id="state">READY WHEN YOU ARE</div><div class="command" id="command">READY?</div><div class="sub" id="sub">Start a session to begin</div></div>
- <div class="row"><button class="primary" id="start">START SESSION</button><button class="secondary" id="stop" style="display:none">END</button></div>
- <button class="secondary" id="partnerGo" style="display:none;width:100%;margin-top:9px">PARTNER CALLS GO</button>
- <p class="hint" id="feedback">Prototype audio uses your browser's speech synthesis. Recorded human referee voices are the next audio-library milestone.</p>
-</section>
-
-<section class="panel">
- <div class="label">Session performance</div>
- <div class="metrics">
-  <div class="metric"><b id="avg">—</b><small>Avg reaction</small></div>
-  <div class="metric"><b id="valid">0/10</b><small>Valid starts</small></div>
-  <div class="metric"><b id="false">0</b><small>False starts</small></div>
-  <div class="metric"><b id="repeat">0</b><small>Repeated calls</small></div>
- </div>
- <div class="log" id="history"><div class="logrow"><span>Session history</span><span>Results appear here</span></div></div>
- <p class="hint">Movement scoring in this prototype uses a manual response button. Camera-based hand/forearm tracking and calibrated acoustic onset measurement are planned for the next technical milestone.</p>
-</section>
-<footer class="footer">READYGO v0.3.1 · Experimental prototype · Not an official referee or rules tool</footer>
-</main>
+ <section class="panel" style="margin-top:16px">
+  <h2>Session performance</h2>
+  <div class="stats">
+   <div class="stat"><small id="metricOneLabel">Valid starts</small><strong id="validCount">—</strong></div>
+   <div class="stat"><small id="metricTwoLabel">False starts</small><strong id="falseCount">—</strong></div>
+   <div class="stat"><small id="metricThreeLabel">Avg. response</small><strong id="avgTime">—</strong></div>
+  </div>
+  <div class="note" id="resultsNote" style="margin-top:10px">Camera mode reports movement-based measurements. Audio-only sessions focus on listening discipline and do not calculate physical reaction time or false starts.</div>
+ </section>
+ <footer>READYGO v0.4 · Prototype build. Browser speech is a temporary voice placeholder. Camera tracking quality depends on lighting, camera angle, device performance and hand visibility. Not a certified competition measurement system.</footer>
+</div>
 <script>
-const $=id=>document.getElementById(id);
-let mode='progressive',style='strict',session=false,trial=0,total=10,valid=0,falseStarts=0,repeats=0,reactionTimes=[],waiting=false,goTime=0,noiseCtx=null,noiseGain=null,timers=[],sequenceLog=[],adaptiveLevel=1;
-const commands=['CENTER','ELBOW DOWN','CLOSE YOUR HAND','THUMB','WRIST STRAIGHT',"DON'T MOVE",'KEEP YOUR WRIST','SHOULDERS SQUARE','STAY CENTERED','HOLD YOUR POSITION'];
-function clearTimers(){timers.forEach(clearTimeout);timers=[]}
-function later(fn,ms){const t=setTimeout(fn,ms);timers.push(t);return t}
-function say(text,cb){if(!('speechSynthesis'in window)){show('AUDIO UNAVAILABLE',text,'bad');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.88+Math.random()*.22;u.pitch=.88+Math.random()*.24;u.volume=1;u.onend=()=>cb&&cb();speechSynthesis.speak(u)}
-function show(state,command,kind=''){ $('state').textContent=state;$('command').textContent=command;$('sub').textContent=kind==='go'?'REACT NOW':kind==='bad'?'Movement before the start':'Listen to the referee';$('screen').className='screen '+kind}
-function status(t){$('feedback').textContent=t}
-function update(){ $('avg').textContent=reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'—';$('valid').textContent=valid+'/'+total;$('false').textContent=falseStarts;$('repeat').textContent=repeats}
-function setMode(m){if(session)return;mode=m;$('progressive').classList.toggle('active',m==='progressive');$('competition').classList.toggle('active',m==='competition');$('difficultyField').style.display=m==='progressive'?'block':'none';status(m==='progressive'?'Progressive Training selected. Difficulty can adjust during the session.':'Competition Simulation selected. Expect unpredictable command flow and pressure.')}
-function setStyle(s){if(session)return;style=s;$('strict').classList.toggle('active',s==='strict');$('aggressive').classList.toggle('active',s==='aggressive');$('styleHint').textContent=s==='strict'?'Rules-based flow with realistic corrections and occasional repeated instructions.':'More interruptions, repeated commands, and returns to earlier setup instructions.'}
-function buildSequence(){
- const lvl=mode==='progressive'?adaptiveLevel:4;
- let count=2+Math.floor(Math.random()*(lvl>=4?5:3));
- let seq=[];let pool=[...commands];
- seq.push('READY');
- for(let i=0;i<count;i++){
-   if(i>0&&Math.random()<(style==='aggressive'?.34:.16)){
-     const prior=seq.filter(x=>commands.includes(x));
-     const repeated=prior.length?prior[Math.floor(Math.random()*prior.length)]:pool[0];
-     seq.push({text:repeated,repeat:true});repeats++;
-   } else if(i>1&&style==='aggressive'&&Math.random()<.22){
-     const back=seq.filter(x=>commands.includes(typeof x==='string'?x:x.text));
-     const returned=back[Math.max(0,back.length-2)];
-     seq.push({text:typeof returned==='string'?returned:returned.text,repeat:true});
-   } else seq.push(pool[Math.floor(Math.random()*pool.length)]);
-   if(style==='strict'&&i===count-1)seq.push('SET');
-   if(style==='aggressive'&&i===count-1&&Math.random()<.45)seq.push({text:'DON’T MOVE',repeat:true});
+(() => {
+const $ = id => document.getElementById(id);
+const video=$('video'), canvas=$('overlay'), ctx=canvas.getContext('2d');
+let mode='camera', training='progressive', style='strict', stream=null, running=false, calibrated=false;
+let handLandmarker=null, visionReady=false, detectorBusy=false, raf=0, lastWrist=null, baseline=null, center=null;
+let trial=0,total=10,valid=0,falseStarts=0,missed=0,repeated=0,reactionTimes=[],goAt=0,goFired=false,trialActive=false,sequenceTimer=null,noiseNode=null,noiseGain=null;
+let movementThreshold=.075, detectionSource='fallback motion';
+const translations={en:{ready:"READY",dont:"DON'T MOVE",elbow:"ELBOW DOWN",wrist:"WRIST",set:"SET",go:"GO"},
+ru:{ready:"ГОТОВ",dont:"НЕ ДВИГАТЬСЯ",elbow:"ЛОКОТЬ ВНИЗ",wrist:"ЗАПЯСТЬЕ",set:"СТАРТ",go:"ПОШЁЛ"},
+tr:{ready:"HAZIR",dont:"HAREKET ETME",elbow:"DİRSEĞİ İNDİR",wrist:"BİLEK",set:"SET",go:"BAŞLA"},
+ro:{ready:"PREGĂTIT",dont:"NU MIȘCA",elbow:"COTUL JOS",wrist:"ÎNCHEIETURĂ",set:"SET",go:"START"},
+pl:{ready:"GOTOWY",dont:"NIE RUSZAJ SIĘ",elbow:"ŁOKIEĆ W DÓŁ",wrist:"NADGARSTEK",set:"START",go:"GO"}};
+function words(){return translations[$('language').value]||translations.en}
+function setStatus(s){$('status').textContent=s}
+function state(s,kind='ready'){$('stateText').textContent=s;$('stateText').className='state '+kind}
+function setMode(m){if(running)return;mode=m;$('cameraMode').classList.toggle('active',m==='camera');$('audioMode').classList.toggle('active',m==='audio');$('cameraButtons').classList.toggle('hidden',m==='audio');$('audioModeMessage').classList.toggle('hidden',m!=='audio');$('videoWrap').classList.toggle('hidden',m==='audio');$('visualTitle').textContent=m==='camera'?'Camera training · live tracking':'Audio-only training';$('modeNote').textContent=m==='camera'?'Physical movement, false starts and response timing are measured from camera tracking.':'Auditory practice only. No physical reaction-time or false-start scoring.';$('metricOneLabel').textContent=m==='camera'?'Valid starts':'Trials completed';$('metricTwoLabel').textContent=m==='camera'?'False starts':'Commands repeated';$('metricThreeLabel').textContent=m==='camera'?'Avg. response':'Listening focus';$('validCount').textContent='—';$('falseCount').textContent='—';$('avgTime').textContent='—';}
+function setTraining(t){if(running)return;training=t;$('progressive').classList.toggle('active',t==='progressive');$('competition').classList.toggle('active',t==='competition')}
+function setStyle(s){if(running)return;style=s;$('strict').classList.toggle('active',s==='strict');$('aggressive').classList.toggle('active',s==='aggressive')}
+$('cameraMode').onclick=()=>setMode('camera');$('audioMode').onclick=()=>setMode('audio');$('progressive').onclick=()=>setTraining('progressive');$('competition').onclick=()=>setTraining('competition');$('strict').onclick=()=>setStyle('strict');$('aggressive').onclick=()=>setStyle('aggressive');
+$('length').onchange=()=>{total=Number($('length').value)};
+async function enableCamera(){
+ try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});video.srcObject=stream;await video.play();video.style.display='block';$('placeholder').classList.add('hidden');$('cameraBtn').textContent='Camera enabled';$('calibrateBtn').disabled=false;$('recenterBtn').disabled=false;$('trackingBadge').textContent='TRACKING · STARTING';resizeCanvas();startVision();setStatus('Camera enabled. Place your hand in your normal ready position, then calibrate.');}
+ catch(e){setStatus('Camera unavailable. Allow camera access in your browser, or switch to Audio-only.');}
+}
+$('cameraBtn').onclick=enableCamera;
+$('calibrateBtn').onclick=()=>{if(!lastWrist){setStatus('No hand detected yet. Place your hand clearly in view.');return}center={x:lastWrist.x,y:lastWrist.y};calibrated=true;setStatus('Ready position calibrated. Keep the hand in this position until GO.');state('CENTER SET','ready')};
+$('recenterBtn').onclick=()=>{calibrated=false;center=null;setStatus('Calibration reset. Calibrate again before starting.');state('CALIBRATE','ready')};
+function resizeCanvas(){canvas.width=video.videoWidth||1280;canvas.height=video.videoHeight||720}
+async function startVision(){
+ if(!stream)return;
+ try{
+  const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm');
+  const fileset=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  handLandmarker=await vision.HandLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',delegate:'GPU'},runningMode:'VIDEO',numHands:1});
+  visionReady=true;detectionSource='hand landmarks';$('trackingBadge').textContent='TRACKING · HAND LANDMARKS';setStatus('Hand tracking active. Calibrate your ready position.');
+ }catch(e){visionReady=false;detectionSource='fallback motion';$('trackingBadge').textContent='TRACKING · EXPERIMENTAL';setStatus('Hand-landmark model unavailable. Using experimental frame-motion fallback; accuracy is limited.');}
+ cancelAnimationFrame(raf);loop();
+}
+let prevFrame=null;
+function loop(){
+ if(video.readyState>=2){
+  if(canvas.width!==video.videoWidth||canvas.height!==video.videoHeight)resizeCanvas();
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  let wrist=null;
+  if(visionReady&&handLandmarker&&!detectorBusy){
+   detectorBusy=true;try{const res=handLandmarker.detectForVideo(video,performance.now());if(res.landmarks&&res.landmarks[0]){const lm=res.landmarks[0];wrist={x:lm[0].x,y:lm[0].y};drawHand(lm)}}catch(e){}detectorBusy=false;
+  } else if(!visionReady){wrist=fallbackMotion()}
+  if(wrist){lastWrist=wrist;drawTarget(wrist);if(running&&trialActive&&mode==='camera'&&calibrated)checkMovement(wrist)}
  }
- if(style==='aggressive'&&Math.random()<.3)seq.splice(1,0,'HOLD');
- seq.push('GO');
+ raf=requestAnimationFrame(loop);
+}
+function drawHand(lm){ctx.strokeStyle='#ed2939';ctx.fillStyle='#f2f4f7';ctx.lineWidth=4;const links=[[0,1,2,3,4],[0,5,6,7,8],[5,9,10,11,12],[9,13,14,15,16],[13,17,18,19,20],[0,17]];links.forEach(a=>{ctx.beginPath();a.forEach((id,i)=>{const p=lm[id];if(i===0)ctx.moveTo(p.x*canvas.width,p.y*canvas.height);else ctx.lineTo(p.x*canvas.width,p.y*canvas.height)});ctx.stroke()});lm.forEach(p=>{ctx.beginPath();ctx.arc(p.x*canvas.width,p.y*canvas.height,5,0,Math.PI*2);ctx.fill()})}
+function drawTarget(w){if(!calibrated||!center)return;ctx.strokeStyle='#45d483';ctx.lineWidth=3;ctx.beginPath();ctx.arc(center.x*canvas.width,center.y*canvas.height,Math.min(canvas.width,canvas.height)*movementThreshold,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#45d483';ctx.beginPath();ctx.arc(w.x*canvas.width,w.y*canvas.height,8,0,Math.PI*2);ctx.fill()}
+function fallbackMotion(){try{const c=document.createElement('canvas'),w=80,h=45;c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(video,0,0,w,h);const d=x.getImageData(0,0,w,h).data;let sum=0,n=0;for(let i=0;i<d.length;i+=16){sum+=d[i]+d[i+1]+d[i+2];n++}const avg=sum/(n*3*255);if(prevFrame===null){prevFrame=avg;return null}const delta=Math.abs(avg-prevFrame);prevFrame=avg;if(delta>.012){return {x:.5+Math.min(.2,delta),y:.55}}return lastWrist}catch(e){return null}}
+function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w.y-center.y);if(!goFired&&dist>movementThreshold){falseStarts++;$('falseCount').textContent=falseStarts;trialActive=false;state('FALSE START','bad');setStatus('Movement detected before GO. Reset, settle, and wait for the command.');$('nextBtn').disabled=false;return}if(goFired&&goAt&&dist>movementThreshold*.75){const ms=Math.max(0,performance.now()-goAt);reactionTimes.push(ms);valid++;$('validCount').textContent=valid;$('avgTime').textContent=Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms';trialActive=false;state(Math.round(ms)+' ms','go');setStatus('Movement detected after GO. Valid start recorded.');$('nextBtn').disabled=false;goAt=0}}
+function speak(text,isGo=false){
+ if(!('speechSynthesis'in window)){setStatus('Speech synthesis is unavailable in this browser.');return}
+ const u=new SpeechSynthesisUtterance(text);u.lang=$('language').value==='ru'?'ru-RU':'en-US';u.rate=isGo?1.08:(.88+Math.random()*.24);u.pitch=.9+Math.random()*.2;u.volume=1;
+ if(isGo){u.onstart=()=>{goAt=performance.now();goFired=true;state(words().go,'go');$('commandText').textContent=words().go};}
+ speechSynthesis.speak(u);
+}
+function noiseStart(){noiseStop();const level=$('noise').value;if(level==='off')return;try{const ac=new(window.AudioContext||window.webkitAudioContext)();const buffer=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1);const src=ac.createBufferSource();src.buffer=buffer;src.loop=true;const filter=ac.createBiquadFilter();filter.type='lowpass';filter.frequency.value=level==='low'?500:1100;const gain=ac.createGain();gain.gain.value=level==='low'?.012:.025;src.connect(filter);filter.connect(gain);gain.connect(ac.destination);src.start();noiseNode={src,ac};}catch(e){}}
+function noiseStop(){if(noiseNode){try{noiseNode.src.stop();noiseNode.ac.close()}catch(e){}noiseNode=null}}
+function commandSequence(){
+ const w=words(),aggr=style==='aggressive',comp=training==='competition';
+ let seq=[w.ready];
+ if(Math.random()<(aggr?.65:.28))seq.push(w.dont);
+ if(Math.random()<(aggr?.72:.25))seq.push(w.elbow);
+ if(Math.random()<(aggr?.58:.18))seq.push(w.ready);
+ if(comp&&Math.random()<.55)seq.push(w.dont);
+ if(Math.random()<(aggr?.7:.2))seq.push(seq[Math.floor(Math.random()*seq.length)]);
+ seq.push(w.set);
  return seq;
 }
-function renderSequence(seq){$('sequence').innerHTML='';seq.forEach(item=>{const s=document.createElement('span');const txt=typeof item==='string'?item:item.text;s.className='chip'+(typeof item==='object'?' repeat':'')+(txt==='GO'?' go':'');s.textContent=txt;$('sequence').append(s)})}
-function playAmbient(){if(!$('noise').checked)return;try{noiseCtx=new(window.AudioContext||window.webkitAudioContext)();const n=noiseCtx.sampleRate*2,b=noiseCtx.createBuffer(1,n,noiseCtx.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*.18;const src=noiseCtx.createBufferSource();src.buffer=b;src.loop=true;noiseGain=noiseCtx.createGain();noiseGain.gain.value=(+$('volume').value/100)*.10;src.connect(noiseGain).connect(noiseCtx.destination);src.start();noiseCtx._src=src}catch(e){}}
-function stopAmbient(){try{noiseCtx._src.stop();noiseCtx.close()}catch(e){}noiseCtx=null}
-function runTrial(){
- if(!session)return;waiting=false;const seq=buildSequence();renderSequence(seq);let i=0;
- function step(){if(!session)return;if(i>=seq.length){later(()=>{if(!session)return;waiting=true;show('HOLD YOUR POSITION','LISTEN…');const delay=mode==='progressive'?650+Math.random()*1700:700+Math.random()*3400;later(()=>callGo(),delay)},300);return}
-  const item=seq[i++],txt=typeof item==='string'?item:item.text;
-  if(txt==='GO'){callGo();return}
-  show('REFEREE COMMAND',txt,typeof item==='object'?'bad':'');
-  say(txt,()=>{});
-  later(step,(style==='aggressive'?450+Math.random()*650:850+Math.random()*850));
+function scheduleTrial(){
+ if(!running)return;
+ trial++;$('trialBadge').textContent=`TRIAL ${trial} / ${total}`;$('progressBar').style.width=((trial-1)/total*100)+'%';$('nextBtn').disabled=true;
+ trialActive=mode==='camera';goFired=false;goAt=0;state('LISTEN','ready');$('commandText').textContent='LISTEN';setStatus('Listen carefully. Do not anticipate the start.');
+ const seq=commandSequence();let idx=0;
+ function sayNext(){if(!running)return;if(idx<seq.length){const c=seq[idx++];$('commandText').textContent=c;if(c===words().ready)repeated++;speak(c);sequenceTimer=setTimeout(sayNext,650+Math.random()*(style==='aggressive'?1050:1500));}
+ else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;goFired=true;goAt=performance.now();state(words().go,'go');speak(words().go,true);if(mode==='audio'){setStatus('GO delivered. Audio-only practice: focus on recognition and disciplined response; no movement score.');trialActive=false;$('nextBtn').disabled=false;}else{setStatus('GO. Move from your calibrated ready position.');setTimeout(()=>{if(running&&trialActive&&goFired){missed++;trialActive=false;missedCheck();}},2200)}} ,delay)}
  }
- step();
+ sayNext();
 }
-function callGo(){if(!session)return;waiting=true;show('OFFICIAL START','GO!','go');goTime=performance.now();say('GO!',()=>{});$('partnerGo').style.display='block';later(()=>{if(waiting){waiting=false;show('MISSED START','NO RESPONSE','bad');status('No response registered.');nextTrial()}},2200)}
-function respond(){if(!session)return;if(!waiting){falseStarts++;if(mode==='progressive'&&adaptiveLevel>1)adaptiveLevel--;show('FALSE START','TOO EARLY','bad');status('False start recorded. Wait for the referee GO.'+(mode==='progressive'?' Difficulty adjusted to Level '+adaptiveLevel+'.':''));update();return}const ms=Math.round(performance.now()-goTime);waiting=false;valid++;reactionTimes.push(ms);if(mode==='progressive'&&valid%3===0&&falseStarts===0&&adaptiveLevel<5){adaptiveLevel++;status('Three clean starts. Difficulty increased to Level '+adaptiveLevel+'.')}else{status('Start response recorded.')}show('VALID START',ms+' ms','go');update();later(nextTrial,1100)}
-function nextTrial(){if(!session)return;trial++;if(trial>=total){finish();return}later(runTrial,850)}
-function begin(){if(session)return;adaptiveLevel=+$('difficulty').value;session=true;trial=0;valid=0;falseStarts=0;repeats=0;reactionTimes=[];total=+$('rounds').value;update();$('start').style.display='none';$('stop').style.display='block';playAmbient();status('Session started. Tap the central training area only when you hear GO.');runTrial()}
-function finish(){session=false;waiting=false;clearTimers();stopAmbient();speechSynthesis.cancel();$('start').style.display='block';$('stop').style.display='none';$('partnerGo').style.display='none';show('SESSION COMPLETE','REVIEW RESULTS');status('Session complete. Adjust your training and run it again.');$('history').innerHTML=`<div class="logrow"><span>Mode / referee</span><span>${mode==='progressive'?'Progressive':'Competition'} · ${style==='strict'?'Strict':'Aggressive'}</span></div><div class="logrow"><span>Valid starts / false starts</span><span>${valid} / ${falseStarts}</span></div><div class="logrow"><span>Repeated commands</span><span>${repeats}</span></div>`;update()}
-function end(){if(session)finish()}
-$('progressive').onclick=()=>setMode('progressive');$('competition').onclick=()=>setMode('competition');$('strict').onclick=()=>setStyle('strict');$('aggressive').onclick=()=>setStyle('aggressive');$('start').onclick=begin;$('stop').onclick=end;$('partnerGo').onclick=respond;
-$('screen').onclick=()=>{if(session)respond()};
-$('difficulty').onchange=()=>{status('Progressive difficulty set to Level '+$('difficulty').value+'.')};
-$('volume').oninput=()=>{if(noiseGain)noiseGain.gain.value=(+$('volume').value/100)*.10};
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&session)end()});
-update();
-</script></body></html>
+function missedCheck(){state('NO RESPONSE','bad');setStatus('No movement detected after GO. Review your position and try the next trial.');$('nextBtn').disabled=false}
+function startSession(){
+ if(running)return;total=Number($('length').value);if(mode==='camera'&&(!stream||!calibrated)){setStatus('Camera Mode requires an enabled camera and a ready-position calibration.');return}
+ running=true;trial=valid=falseStarts=missed=repeated=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
+ ['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=true);noiseStart();scheduleTrial();
+}
+function nextTrial(){if(!running)return;if(trial>=total){endSession();return}scheduleTrial()}
+function endSession(){
+ running=false;trialActive=false;clearTimeout(sequenceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width='100%';state('SESSION COMPLETE','ready');$('commandText').textContent='COMPLETE';
+ if(mode==='camera'){$('resultsNote').textContent=`${valid} valid starts · ${falseStarts} false starts · ${missed} missed responses. Average measured movement response: ${reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'not available'}. Measurement begins from the browser speech event, not verified acoustic onset.`;setStatus('Session complete. Review the results and refine your discipline.')}
+ else{$('validCount').textContent=total;$('falseCount').textContent=repeated;$('avgTime').textContent='—';$('resultsNote').textContent='Audio-only session completed. No physical reaction time or false-start scoring was collected. Repeated setup commands are counted as a measure of sequence complexity.';setStatus('Audio-only session complete. No physical response measurements were recorded.')}
+}
+$('startBtn').onclick=startSession;$('nextBtn').onclick=nextTrial;$('stopBtn').onclick=endSession;
+window.addEventListener('beforeunload',()=>{if(stream)stream.getTracks().forEach(t=>t.stop());noiseStop()});
+})();
+</script>
+</body></html>
