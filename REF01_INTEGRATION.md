@@ -1,6 +1,6 @@
 # REF01 audio integration (v0.5.0 draft)
 
-Place the 19 WAV assets from ReadyGo_REF01_Production_19_GO.zip under `audio/ref01/` with names `GO01_trimmed.wav` through `GO20_trimmed.wav`, excluding `GO08_trimmed.wav`. The application preloads them at session start, selects randomly, and avoids immediately repeating the same take. If no clips load, browser speech remains a fallback.
+Place the 19 WAV assets from ReadyGo_REF01_Production_19_GO.zip under `audio/ref01/` with names `GO01.wav` through `GO20.wav`, excluding `GO08.wav`. The application preloads them at session start, selects randomly, and avoids immediately repeating the same take. If no clips load, browser speech remains a fallback.
 
 ## Important validation
 - The recorded GO start is scheduled using Web Audio clock and a nominal 35 ms lead. This is **not** calibrated acoustic output latency. Do not claim millisecond-accurate reaction measurements until device-level validation.
