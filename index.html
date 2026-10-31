@@ -3,106 +3,125 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#101a27">
-<title>ReadyGo — Reaction Training</title>
+<meta name="theme-color" content="#090b10">
+<title>ReadyGo — Hear it. Recognize it. Hit it.</title>
 <style>
-:root{--bg:#0c1420;--panel:#142235;--panel2:#1b2c42;--ink:#f3f7fb;--muted:#9aabc0;--lime:#c8f36a;--red:#ff6b6b;--line:#2a3d55}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,#1b3047 0,#0c1420 45%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
-main{max-width:760px;margin:auto;padding:20px 16px 48px}.top{display:flex;justify-content:space-between;align-items:center;margin:6px 0 22px}.brand{font-weight:950;letter-spacing:.08em;font-size:25px}.brand span{color:var(--lime)}.tag{font-size:11px;color:var(--lime);border:1px solid #607b36;border-radius:99px;padding:6px 10px;letter-spacing:.12em}
-h1{font-size:30px;line-height:1.05;margin:0 0 8px}p{color:var(--muted);line-height:1.5;margin:0}.intro{margin-bottom:20px}
-.panel{background:linear-gradient(145deg,#17283c,#101d2d);border:1px solid var(--line);border-radius:20px;padding:17px;margin:14px 0;box-shadow:0 14px 35px #0003}
-.label{font-size:11px;font-weight:800;color:var(--muted);letter-spacing:.13em;text-transform:uppercase;margin-bottom:9px}
-.segment{display:grid;grid-template-columns:1fr 1fr;gap:8px}.segment button,.secondary{background:var(--panel2);color:var(--ink);border:1px solid var(--line)}
-button,select{font:inherit;border-radius:12px;padding:13px 14px;border:0;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.segment button.active{background:#344b2a;border-color:#8eb34b;color:#e8ffba}
-.primary{background:var(--lime);color:#17220a;font-weight:900;width:100%;font-size:16px}.secondary{font-weight:700}.row{display:flex;gap:9px;align-items:center}.row>*{flex:1}
-select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);width:100%}
-.big{font-size:54px;font-weight:950;letter-spacing:-.04em;text-align:center;margin:10px 0 2px}.status{text-align:center;color:var(--muted);font-size:13px;min-height:20px}.go{color:var(--lime)}.bad{color:var(--red)}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.metric{background:#0d1928;border:1px solid var(--line);border-radius:14px;padding:13px 9px;text-align:center}.metric b{display:block;font-size:23px;margin-bottom:4px}.metric small{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
-video{width:100%;border-radius:14px;background:#050a10;max-height:300px;object-fit:cover;transform:scaleX(-1)}canvas{display:none}
-.note{font-size:12px;color:var(--muted);line-height:1.45}.check{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:13px;margin-top:10px}.check input{accent-color:var(--lime);width:18px;height:18px}
-.commands{display:flex;flex-wrap:wrap;gap:6px}.chip{font-size:11px;background:#20334a;border:1px solid #304963;color:#c3d0df;padding:6px 9px;border-radius:99px}
-.footer{text-align:center;color:#71849a;font-size:11px;margin-top:24px}
-@media(max-width:420px){main{padding:16px 12px 36px}.big{font-size:46px}.panel{padding:14px}.metrics{gap:6px}.metric b{font-size:20px}}
+:root{--bg:#090b10;--panel:#141821;--panel2:#1d2430;--ink:#f4f6fa;--muted:#9ba5b5;--red:#ff303b;--red2:#a90e19;--line:#303846;--green:#b8f36b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#3a1118 0,#151018 32%,#090b10 68%);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
+main{max-width:850px;margin:auto;padding:20px 15px 48px}.top{display:flex;align-items:center;justify-content:space-between;margin:4px 0 25px}.brand{font-size:27px;font-weight:1000;letter-spacing:.06em;font-style:italic}.brand span{color:var(--red)}.version{font-size:10px;letter-spacing:.14em;border:1px solid #71313a;color:#ff8c93;padding:7px 10px;border-radius:30px}
+h1{font-size:clamp(30px,7vw,44px);line-height:1;margin:0 0 9px;font-weight:950;letter-spacing:-.04em}h1 em{font-style:normal;color:var(--red)}p{color:var(--muted);line-height:1.5;margin:0}.intro{margin-bottom:20px}.eyebrow,.label{font-size:10px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:#b5bdc9;margin-bottom:10px}
+.panel{background:linear-gradient(145deg,#191e28,#10141c);border:1px solid var(--line);border-radius:19px;padding:17px;margin:13px 0;box-shadow:0 14px 35px #0005}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:9px}.choice{background:#1c222d;color:var(--ink);border:1px solid #394252;border-radius:14px;padding:14px;text-align:left;min-height:105px}.choice strong{display:block;font-size:15px;margin-bottom:6px}.choice small{display:block;color:var(--muted);font-size:11px;line-height:1.4}.choice.active{border-color:var(--red);background:linear-gradient(145deg,#42171e,#24151b);box-shadow:inset 0 0 0 1px #ff303b55}.choice.active strong{color:#fff}
+.segment{display:grid;grid-template-columns:1fr 1fr;gap:8px}.segment button,select,.secondary{background:var(--panel2);color:var(--ink);border:1px solid #3a4351;border-radius:11px;padding:12px;font:inherit}.segment button.active{border-color:var(--red);background:#40171d;color:#fff}.primary{width:100%;background:linear-gradient(100deg,#ff414b,#c50d1b);color:white;border:0;border-radius:12px;padding:15px;font-weight:950;font-size:16px;letter-spacing:.04em;box-shadow:0 7px 20px #b80d1d44}.secondary{font-weight:750}.row{display:flex;gap:9px}.row>*{flex:1}select{width:100%}.field{margin-top:14px}.hint{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.45}
+.screen{background:#080b11;border:1px solid #3b4657;border-radius:17px;padding:18px 12px;text-align:center;margin:14px 0}.screen .state{font-size:10px;letter-spacing:.18em;color:#a7b0bd;font-weight:900}.screen .command{font-size:clamp(34px,9vw,58px);font-weight:1000;letter-spacing:-.04em;margin:15px 0 6px;min-height:65px}.screen .sub{font-size:12px;color:var(--muted);min-height:18px}.screen.go .command{color:var(--green)}.screen.bad .command{color:#ff646c}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{background:#0c1017;border:1px solid #303846;border-radius:12px;padding:12px 6px;text-align:center}.metric b{font-size:21px;display:block}.metric small{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{font-size:10px;background:#222b38;border:1px solid #3b4657;color:#d2d8e1;padding:7px 9px;border-radius:30px}.chip.repeat{border-color:#ad3b45;color:#ff9da3}.chip.go{border-color:#729a3f;color:var(--green)}
+.log{display:grid;gap:6px;margin-top:10px}.logrow{display:flex;justify-content:space-between;gap:10px;background:#0c1017;border:1px solid #293240;border-radius:9px;padding:9px 10px;font-size:11px}.logrow span:last-child{color:var(--muted);text-align:right}
+.footer{text-align:center;color:#687384;font-size:10px;margin-top:24px;line-height:1.5}
+@media(max-width:520px){main{padding:16px 12px 35px}.panel{padding:14px}.metrics{grid-template-columns:repeat(2,1fr)}.modes{grid-template-columns:1fr 1fr}.choice{padding:11px;min-height:112px}}
 </style>
 </head>
-<body>
-<main>
-  <div class="top"><div class="brand">READY<span>GO</span></div><div class="tag">FIELD TEST · 0.1</div></div>
-  <div class="intro"><h1>Hear it. Recognize it. Hit it.</h1><p>Train your start response under referee commands and distractions. This is an early field-test prototype.</p></div>
+<body><main>
+<header class="top"><div class="brand">READY<span>GO</span></div><div class="version">FIELD TEST · 0.3</div></header>
+<section class="intro"><div class="eyebrow">Armwrestling start-response training</div><h1>Hear it. Recognize it. <em>Hit it.</em></h1><p>Train the start—not a predictable countdown. Referees repeat commands, interrupt progression, and keep athletes honest before GO.</p></section>
 
-  <section class="panel">
-    <div class="label">Training mode</div>
-    <div class="segment"><button id="simBtn" class="active">Simulated referee</button><button id="liveBtn">Live referee</button></div>
-    <div style="height:15px"></div>
-    <div class="label">Referee voice</div>
-    <select id="voiceSelect" aria-label="Referee voice"></select>
-    <div style="height:13px"></div>
-    <div class="label">Session length</div>
-    <select id="roundSelect"><option value="5">5 starts · Quick test</option><option value="10" selected>10 starts · Standard</option><option value="20">20 starts · Endurance</option></select>
-    <label class="check"><input type="checkbox" id="crowdToggle"> Add crowd-style background noise (experimental)</label>
-  </section>
+<section class="panel">
+ <div class="label">Choose your training mode</div>
+ <div class="modes">
+  <button class="choice active" id="progressive"><strong>Progressive Training</strong><small>Build recognition, consistency, and discipline through adaptive levels.</small></button>
+  <button class="choice" id="competition"><strong>Competition Simulation</strong><small>Unpredictable referee sequences, voice delivery, timing, and pressure.</small></button>
+ </div>
+ <div class="field"><div class="label">Referee style</div><div class="segment"><button class="active" id="strict">Strict Progression</button><button id="aggressive">Aggressive Referee</button></div><p class="hint" id="styleHint">Rules-based flow with realistic corrections and occasional repeated instructions.</p></div>
+ <div class="field" id="difficultyField"><div class="label">Difficulty</div><select id="difficulty"><option value="1">Level 1 · Foundation</option><option value="2">Level 2 · Recognition</option><option value="3">Level 3 · Timing</option><option value="4">Level 4 · Distraction</option><option value="5">Level 5 · Pressure</option></select></div>
+ <div class="field"><div class="label">Session length</div><select id="rounds"><option value="5">5 trials · Quick session</option><option value="10" selected>10 trials · Standard session</option><option value="20">20 trials · Endurance session</option></select></div>
+ <div class="field"><label class="hint"><input type="checkbox" id="noise" checked> Enable experimental ambient noise</label><input id="volume" type="range" min="0" max="100" value="35" style="width:100%;accent-color:#ff303b"><p class="hint">Generated sound texture only; authentic crowd recordings will replace this placeholder.</p></div>
+</section>
 
-  <section class="panel">
-    <div class="label">Camera movement tracking</div>
-    <video id="video" playsinline muted></video><canvas id="canvas"></canvas>
-    <div class="row" style="margin-top:10px"><button id="cameraBtn" class="secondary">Enable camera</button><button id="calibrateBtn" class="secondary" disabled>Calibrate</button></div>
-    <p class="note" id="cameraNote" style="margin-top:9px">Optional. Position the phone so your hand and forearm are visible. Camera tracking is a coarse movement indicator, not validated reaction-time instrumentation.</p>
-  </section>
+<section class="panel">
+ <div class="label">Referee command sequence</div>
+ <div class="chips" id="sequence"><span class="chip">READY</span><span class="chip">CENTER</span><span class="chip">ELBOW DOWN</span><span class="chip">SET</span><span class="chip go">GO</span></div>
+ <p class="hint" id="sequenceHint">The referee may repeat a command or return to an earlier instruction before allowing the start.</p>
+</section>
 
-  <section class="panel">
-    <div class="label">Training sequence</div>
-    <div class="commands" id="commandList">
-      <span class="chip">CENTER</span><span class="chip">ELBOW DOWN</span><span class="chip">CLOSE YOUR HAND</span><span class="chip">THUMB</span><span class="chip">WRIST STRAIGHT</span><span class="chip">SHOULDERS SQUARE</span><span class="chip">DON'T MOVE</span>
-    </div>
-    <div class="big" id="display">READY?</div>
-    <div class="status" id="status">Choose a mode, then start a session.</div>
-    <div style="height:14px"></div>
-    <button id="startBtn" class="primary">START TRAINING</button>
-    <button id="liveGoBtn" class="primary" style="display:none;margin-top:9px">CALL GO</button>
-    <button id="stopBtn" class="secondary" style="display:none;width:100%;margin-top:9px">End session</button>
-  </section>
+<section class="panel">
+ <div class="label">Live training</div>
+ <div class="screen" id="screen"><div class="state" id="state">READY WHEN YOU ARE</div><div class="command" id="command">READY?</div><div class="sub" id="sub">Start a session to begin</div></div>
+ <div class="row"><button class="primary" id="start">START SESSION</button><button class="secondary" id="stop" style="display:none">END</button></div>
+ <button class="secondary" id="partnerGo" style="display:none;width:100%;margin-top:9px">PARTNER CALLS GO</button>
+ <p class="hint" id="feedback">Prototype audio uses your browser's speech synthesis. Recorded human referee voices are the next audio-library milestone.</p>
+</section>
 
-  <section class="panel">
-    <div class="label">Session performance</div>
-    <div class="metrics">
-      <div class="metric"><b id="avg">—</b><small>Avg reaction</small></div>
-      <div class="metric"><b id="false">0</b><small>False starts</small></div>
-      <div class="metric"><b id="count">0/10</b><small>Valid starts</small></div>
-    </div>
-    <p class="note" id="resultNote" style="margin-top:11px">Reaction time is measured from the browser's GO speech-start event to detected camera motion, when camera tracking is enabled. Without the camera, tap CALL GO in live mode to test the referee workflow; motion scoring is unavailable.</p>
-  </section>
-  <div class="footer">READYGO v0.1 · Prototype for training experiments · Not an official referee or rules tool</div>
+<section class="panel">
+ <div class="label">Session performance</div>
+ <div class="metrics">
+  <div class="metric"><b id="avg">—</b><small>Avg reaction</small></div>
+  <div class="metric"><b id="valid">0/10</b><small>Valid starts</small></div>
+  <div class="metric"><b id="false">0</b><small>False starts</small></div>
+  <div class="metric"><b id="repeat">0</b><small>Repeated calls</small></div>
+ </div>
+ <div class="log" id="history"><div class="logrow"><span>Session history</span><span>Results appear here</span></div></div>
+ <p class="hint">Movement scoring in this prototype uses a manual response button. Camera-based hand/forearm tracking and calibrated acoustic onset measurement are planned for the next technical milestone.</p>
+</section>
+<footer class="footer">READYGO v0.3 · Experimental prototype · Not an official referee or rules tool</footer>
 </main>
 <script>
 const $=id=>document.getElementById(id);
-let mode='sim',stream=null,raf=null,baseline=null,goAt=null,session=false,waiting=false,round=0,total=10,times=[],falseStarts=0,noiseCtx=null,noiseSource=null,noiseGain=null,voiceList=[];
-const commands=['CENTER','ELBOW DOWN','CLOSE YOUR HAND','THUMB','WRIST STRAIGHT','SHOULDERS SQUARE',"DON'T MOVE",'KEEP YOUR WRIST','STAY CENTERED','HOLD YOUR POSITION','ADJUST YOUR GRIP','WAIT'];
-const video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d',{willReadFrequently:true});
-function setStatus(t,cls=''){ $('status').textContent=t;$('status').className='status '+cls; }
-function loadVoices(){voiceList=speechSynthesis.getVoices();const sel=$('voiceSelect');const old=sel.value;sel.innerHTML='';let list=voiceList.filter(v=>v.lang.toLowerCase().startsWith('en'));if(!list.length)list=voiceList;list.forEach((v,i)=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name+' · '+v.lang;sel.appendChild(o)});if(old&&[...sel.options].some(o=>o.value===old))sel.value=old;}
-speechSynthesis.onvoiceschanged=loadVoices;loadVoices();
-function speak(text,cb){if(!('speechSynthesis'in window)){setStatus('Speech synthesis is not available in this browser.','bad');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);const v=voiceList.find(x=>x.name===$('voiceSelect').value);if(v)u.voice=v;u.rate=0.92;u.pitch=1;u.onstart=()=>{if(cb)cb(performance.now())};speechSynthesis.speak(u);}
-function updateMetrics(){ $('avg').textContent=times.length?Math.round(times.reduce((a,b)=>a+b,0)/times.length)+' ms':'—';$('false').textContent=falseStarts;$('count').textContent=times.length+'/'+total;}
-function startNoise(){if(!$('crowdToggle').checked)return;try{noiseCtx=new (window.AudioContext||window.webkitAudioContext)();const n=noiseCtx.sampleRate*2;const b=noiseCtx.createBuffer(1,n,noiseCtx.sampleRate);const d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*0.12;noiseSource=noiseCtx.createBufferSource();noiseSource.buffer=b;noiseSource.loop=true;noiseGain=noiseCtx.createGain();noiseGain.gain.value=.13;noiseSource.connect(noiseGain).connect(noiseCtx.destination);noiseSource.start()}catch(e){}}
-function stopNoise(){try{noiseSource&&noiseSource.stop();noiseCtx&&noiseCtx.close()}catch(e){}noiseSource=null;noiseCtx=null;}
-function frame(){if(!stream||video.readyState<2)return;canvas.width=80;canvas.height=60;ctx.drawImage(video,0,0,80,60);const data=ctx.getImageData(0,0,80,60).data;let diff=0;if(baseline){for(let i=0;i<data.length;i+=4)diff+=Math.abs(data[i]-baseline[i])+Math.abs(data[i+1]-baseline[i+1])+Math.abs(data[i+2]-baseline[i+2]);diff/=data.length/4;if(waiting&&diff>18){if(goAt===null)falseStart();else registerMotion(performance.now(),'camera')}}baseline=new Uint8ClampedArray(data);raf=requestAnimationFrame(frame);}
-async function enableCamera(){try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});video.srcObject=stream;await video.play();$('cameraBtn').textContent='Camera enabled';$('calibrateBtn').disabled=false;$('cameraNote').textContent='Camera active. Keep the phone still and keep your hand/forearm in frame. Tap Calibrate while holding your start position.';baseline=null;frame()}catch(e){$('cameraNote').textContent='Camera unavailable: '+e.message+'. Use HTTPS and allow camera access.'}}
-function calibrate(){if(!stream){setStatus('Enable the camera first.');return;}baseline=null;setStatus('Calibration captured. Hold your start position.');$('calibrateBtn').textContent='Recalibrate';}
-function registerMotion(t,source){if(!waiting)return;waiting=false;const ms=Math.max(0,Math.round(t-goAt));times.push(ms);setStatus('Movement detected · '+ms+' ms','go');$('display').textContent=ms+' ms';updateMetrics();setTimeout(nextRound,1200);}
-function falseStart(){if(!waiting||goAt!==null)return;falseStarts++;waiting=false;$('display').textContent='EARLY';setStatus('Movement before GO — false start','bad');updateMetrics();setTimeout(nextRound,1200);}
-function armGo(){if(!session)return;waiting=true;goAt=null;baseline=null;$('display').textContent='LISTEN';setStatus('Wait for the start command…');}
-function doGo(){if(!session||!waiting)return;const mark=t=>{goAt=t;setStatus('GO! HIT!','go');$('display').textContent='GO!';if(!stream){setStatus('GO called. Enable camera to score movement.','go');setTimeout(nextRound,1100)}};if(mode==='sim'){speak('Go!',mark)}else{mark(performance.now())}}
-function nextRound(){if(!session)return;round++;if(round>=total){finish();return;}playSequence();}
-function playSequence(){if(!session)return;waiting=false;goAt=null;$('display').textContent='SETUP';let i=0;const n=2+Math.floor(Math.random()*4);function sayNext(){if(!session)return;if(i>=n){const delay=850+Math.random()*2600;setTimeout(()=>{if(!session)return;armGo();if(mode==='sim')setTimeout(doGo,500+Math.random()*900);},delay);return;}const c=commands[Math.floor(Math.random()*commands.length)];$('display').textContent=c;speak(c,()=>{});i++;setTimeout(sayNext,950+Math.random()*950);}sayNext();}
-function begin(){if(session)return;total=+$('roundSelect').value;round=0;times=[];falseStarts=0;session=true;updateMetrics();$('startBtn').style.display='none';$('stopBtn').style.display='block';$('liveGoBtn').style.display=mode==='live'?'block':'none';startNoise();if(mode==='sim'){setStatus('Simulated referee session started.');playSequence()}else{setStatus('Live referee mode. Partner calls commands; tap CALL GO at the exact spoken start.');armGo();}}
-function finish(){session=false;waiting=false;stopNoise();$('startBtn').style.display='block';$('stopBtn').style.display='none';$('liveGoBtn').style.display='none';$('display').textContent='SESSION DONE';setStatus('Session complete. Review your results below.');}
-function end(){if(!session)return;finish();}
-$('simBtn').onclick=()=>{if(session)return;mode='sim';$('simBtn').classList.add('active');$('liveBtn').classList.remove('active');$('liveGoBtn').style.display='none';setStatus('Simulated referee mode selected.')};
-$('liveBtn').onclick=()=>{if(session)return;mode='live';$('liveBtn').classList.add('active');$('simBtn').classList.remove('active');$('liveGoBtn').style.display='none';setStatus('Live referee mode selected.')};
-$('cameraBtn').onclick=enableCamera;$('calibrateBtn').onclick=calibrate;$('startBtn').onclick=begin;$('stopBtn').onclick=end;
-$('liveGoBtn').onclick=()=>{if(!session){return;}if(!waiting){armGo();return;}doGo();};
-$('display').addEventListener('click',()=>{if(session&&waiting&&goAt===null)falseStart()});
+let mode='progressive',style='strict',session=false,trial=0,total=10,valid=0,falseStarts=0,repeats=0,reactionTimes=[],waiting=false,goTime=0,noiseCtx=null,noiseGain=null,timers=[],sequenceLog=[],adaptiveLevel=1;
+const commands=['CENTER','ELBOW DOWN','CLOSE YOUR HAND','THUMB','WRIST STRAIGHT',"DON'T MOVE",'KEEP YOUR WRIST','SHOULDERS SQUARE','STAY CENTERED','HOLD YOUR POSITION'];
+function clearTimers(){timers.forEach(clearTimeout);timers=[]}
+function later(fn,ms){const t=setTimeout(fn,ms);timers.push(t);return t}
+function say(text,cb){if(!('speechSynthesis'in window)){show('AUDIO UNAVAILABLE',text,'bad');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.88+Math.random()*.22;u.pitch=.88+Math.random()*.24;u.volume=1;u.onend=()=>cb&&cb();speechSynthesis.speak(u)}
+function show(state,command,kind=''){ $('state').textContent=state;$('command').textContent=command;$('sub').textContent=kind==='go'?'REACT NOW':kind==='bad'?'Movement before the start':'Listen to the referee';$('screen').className='screen '+kind}
+function status(t){$('feedback').textContent=t}
+function update(){ $('avg').textContent=reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'—';$('valid').textContent=valid+'/'+total;$('false').textContent=falseStarts;$('repeat').textContent=repeats}
+function setMode(m){if(session)return;mode=m;$('progressive').classList.toggle('active',m==='progressive');$('competition').classList.toggle('active',m==='competition');$('difficultyField').style.display=m==='progressive'?'block':'none';status(m==='progressive'?'Progressive Training selected. Difficulty can adjust during the session.':'Competition Simulation selected. Expect unpredictable command flow and pressure.')}
+function setStyle(s){if(session)return;style=s;$('strict').classList.toggle('active',s==='strict');$('aggressive').classList.toggle('active',s==='aggressive');$('styleHint').textContent=s==='strict'?'Rules-based flow with realistic corrections and occasional repeated instructions.':'More interruptions, repeated commands, and returns to earlier setup instructions.'}
+function buildSequence(){
+ const lvl=mode==='progressive'?adaptiveLevel:4;
+ let count=2+Math.floor(Math.random()*(lvl>=4?5:3));
+ let seq=[];let pool=[...commands];
+ seq.push('READY');
+ for(let i=0;i<count;i++){
+   if(i>0&&Math.random()<(style==='aggressive'?.34:.16)){
+     const prior=seq.filter(x=>commands.includes(x));
+     const repeated=prior.length?prior[Math.floor(Math.random()*prior.length)]:pool[0];
+     seq.push({text:repeated,repeat:true});repeats++;
+   } else if(i>1&&style==='aggressive'&&Math.random()<.22){
+     const back=seq.filter(x=>commands.includes(typeof x==='string'?x:x.text));
+     const returned=back[Math.max(0,back.length-2)];
+     seq.push({text:typeof returned==='string'?returned:returned.text,repeat:true});
+   } else seq.push(pool[Math.floor(Math.random()*pool.length)]);
+   if(style==='strict'&&i===count-1)seq.push('SET');
+   if(style==='aggressive'&&i===count-1&&Math.random()<.45)seq.push({text:'DON’T MOVE',repeat:true});
+ }
+ if(style==='aggressive'&&Math.random()<.3)seq.splice(1,0,'HOLD');
+ seq.push('GO');
+ return seq;
+}
+function renderSequence(seq){$('sequence').innerHTML='';seq.forEach(item=>{const s=document.createElement('span');const txt=typeof item==='string'?item:item.text;s.className='chip'+(typeof item==='object'?' repeat':'')+(txt==='GO'?' go':'');s.textContent=txt;$('sequence').append(s)})}
+function playAmbient(){if(!$('noise').checked)return;try{noiseCtx=new(window.AudioContext||window.webkitAudioContext)();const n=noiseCtx.sampleRate*2,b=noiseCtx.createBuffer(1,n,noiseCtx.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*.18;const src=noiseCtx.createBufferSource();src.buffer=b;src.loop=true;noiseGain=noiseCtx.createGain();noiseGain.gain.value=(+$('volume').value/100)*.10;src.connect(noiseGain).connect(noiseCtx.destination);src.start();noiseCtx._src=src}catch(e){}}
+function stopAmbient(){try{noiseCtx._src.stop();noiseCtx.close()}catch(e){}noiseCtx=null}
+function runTrial(){
+ if(!session)return;waiting=false;const seq=buildSequence();renderSequence(seq);let i=0;
+ function step(){if(!session)return;if(i>=seq.length){later(()=>{if(!session)return;waiting=true;show('HOLD YOUR POSITION','LISTEN…');const delay=mode==='progressive'?650+Math.random()*1700:700+Math.random()*3400;later(()=>callGo(),delay)},300);return}
+  const item=seq[i++],txt=typeof item==='string'?item:item.text;
+  if(txt==='GO'){callGo();return}
+  show('REFEREE COMMAND',txt,typeof item==='object'?'bad':'');
+  say(txt,()=>{});
+  later(step,(style==='aggressive'?450+Math.random()*650:850+Math.random()*850));
+ }
+ step();
+}
+function callGo(){if(!session)return;waiting=true;show('OFFICIAL START','GO!','go');goTime=performance.now();say('GO!',()=>{});$('partnerGo').style.display='block';later(()=>{if(waiting){waiting=false;show('MISSED START','NO RESPONSE','bad');status('No response registered.');nextTrial()}},2200)}
+function respond(){if(!session)return;if(!waiting){falseStarts++;if(mode==='progressive'&&adaptiveLevel>1)adaptiveLevel--;show('FALSE START','TOO EARLY','bad');status('False start recorded. Wait for the referee’s GO.'+(mode==='progressive'?' Difficulty adjusted to Level '+adaptiveLevel+'.':''));update();return}const ms=Math.round(performance.now()-goTime);waiting=false;valid++;reactionTimes.push(ms);if(mode==='progressive'&&valid%3===0&&falseStarts===0&&adaptiveLevel<5){adaptiveLevel++;status('Three clean starts. Difficulty increased to Level '+adaptiveLevel+'.')}else{status('Start response recorded.')}show('VALID START',ms+' ms','go');update();later(nextTrial,1100)}
+function nextTrial(){if(!session)return;trial++;if(trial>=total){finish();return}later(runTrial,850)}
+function begin(){if(session)return;adaptiveLevel=+$('difficulty').value;session=true;trial=0;valid=0;falseStarts=0;repeats=0;reactionTimes=[];total=+$('rounds').value;update();$('start').style.display='none';$('stop').style.display='block';playAmbient();status('Session started. Tap the central training area only when you hear GO.');runTrial()}
+function finish(){session=false;waiting=false;clearTimers();stopAmbient();speechSynthesis.cancel();$('start').style.display='block';$('stop').style.display='none';$('partnerGo').style.display='none';show('SESSION COMPLETE','REVIEW RESULTS');status('Session complete. Adjust your training and run it again.');$('history').innerHTML=`<div class="logrow"><span>Mode / referee</span><span>${mode==='progressive'?'Progressive':'Competition'} · ${style==='strict'?'Strict':'Aggressive'}</span></div><div class="logrow"><span>Valid starts / false starts</span><span>${valid} / ${falseStarts}</span></div><div class="logrow"><span>Repeated commands</span><span>${repeats}</span></div>`;update()}
+function end(){if(session)finish()}
+$('progressive').onclick=()=>setMode('progressive');$('competition').onclick=()=>setMode('competition');$('strict').onclick=()=>setStyle('strict');$('aggressive').onclick=()=>setStyle('aggressive');$('start').onclick=begin;$('stop').onclick=end;$('partnerGo').onclick=respond;
+$('screen').onclick=()=>{if(session)respond()};
+$('difficulty').onchange=()=>{status('Progressive difficulty set to Level '+$('difficulty').value+'.')};
+$('volume').oninput=()=>{if(noiseGain)noiseGain.gain.value=(+$('volume').value/100)*.10};
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&session)end()});
-updateMetrics();
-</script>
-</body></html>
+update();
+</script></body></html>
