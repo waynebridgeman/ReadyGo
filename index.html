@@ -72,7 +72,7 @@ footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-heigh
     <div class="field"><label>Audio environment</label><select id="noise"><option value="off">Clean audio</option><option value="low">Low background noise</option><option value="medium">Moderate background noise</option></select><div class="note">Generated ambient noise is a placeholder, not authentic competition crowd audio.</div></div>
     <div class="divider"></div>
     <div class="commandBox"><small>REFEREE COMMAND</small><strong id="commandText">WAITING</strong></div>
-    <div class="actions"><button id="startBtn" class="primary wide">Start session</button><button id="nextBtn" disabled>Next trial</button><button id="stopBtn" disabled>End session</button></div>
+    <div class="actions"><button id="startBtn" class="primary wide">Start session</button><button id="nextBtn" disabled class="hidden">Next trial</button><button id="stopBtn" disabled>End session</button></div>
     <div class="progress"><div id="progressBar"></div></div>
     <div class="statusline" id="status">Select a mode, enable the camera if using Camera Mode, then start.</div>
    </div>
@@ -96,7 +96,7 @@ const video=$('video'), canvas=$('overlay'), ctx=canvas.getContext('2d');
 let mode='camera', training='progressive', style='strict', stream=null, running=false, calibrated=false;
 let handLandmarker=null, visionReady=false, detectorBusy=false, raf=0, lastWrist=null, baseline=null, center=null;
 let trial=0,total=10,valid=0,falseStarts=0,missed=0,repeated=0,reactionTimes=[],goAt=0,goFired=false,trialActive=false,sequenceTimer=null,noiseNode=null,noiseGain=null;
-let movementThreshold=.075, detectionSource='fallback motion';
+let movementThreshold=.075, detectionSource='fallback motion', advanceTimer=null;
 const translations={en:{ready:"READY",dont:"DON'T MOVE",elbow:"ELBOW DOWN",wrist:"WRIST",set:"SET",go:"GO"},
 ru:{ready:"ГОТОВ",dont:"НЕ ДВИГАТЬСЯ",elbow:"ЛОКОТЬ ВНИЗ",wrist:"ЗАПЯСТЬЕ",set:"СТАРТ",go:"ПОШЁЛ"},
 tr:{ready:"HAZIR",dont:"HAREKET ETME",elbow:"DİRSEĞİ İNDİR",wrist:"BİLEK",set:"SET",go:"BAŞLA"},
@@ -104,6 +104,7 @@ ro:{ready:"PREGĂTIT",dont:"NU MIȘCA",elbow:"COTUL JOS",wrist:"ÎNCHEIETURĂ",s
 pl:{ready:"GOTOWY",dont:"NIE RUSZAJ SIĘ",elbow:"ŁOKIEĆ W DÓŁ",wrist:"NADGARSTEK",set:"START",go:"GO"}};
 function words(){return translations[$('language').value]||translations.en}
 function setStatus(s){$('status').textContent=s}
+function finishTrial(message){trialActive=false;$('nextBtn').disabled=true;setStatus(message+' Next trial in 2 seconds…');clearTimeout(advanceTimer);advanceTimer=setTimeout(()=>{if(running){if(trial>=total)endSession();else scheduleTrial()}},2000)}
 function state(s,kind='ready'){$('stateText').textContent=s;$('stateText').className='state '+kind}
 function setMode(m){if(running)return;mode=m;$('cameraMode').classList.toggle('active',m==='camera');$('audioMode').classList.toggle('active',m==='audio');$('cameraButtons').classList.toggle('hidden',m==='audio');$('audioModeMessage').classList.toggle('hidden',m!=='audio');$('videoWrap').classList.toggle('hidden',m==='audio');$('visualTitle').textContent=m==='camera'?'Camera training · live tracking':'Audio-only training';$('modeNote').textContent=m==='camera'?'Physical movement, false starts and response timing are measured from camera tracking.':'Auditory practice only. No physical reaction-time or false-start scoring.';$('metricOneLabel').textContent=m==='camera'?'Valid starts':'Trials completed';$('metricTwoLabel').textContent=m==='camera'?'False starts':'Commands repeated';$('metricThreeLabel').textContent=m==='camera'?'Avg. response':'Listening focus';$('validCount').textContent='—';$('falseCount').textContent='—';$('avgTime').textContent='—';}
 function setTraining(t){if(running)return;training=t;$('progressive').classList.toggle('active',t==='progressive');$('competition').classList.toggle('active',t==='competition')}
@@ -144,7 +145,7 @@ function loop(){
 function drawHand(lm){ctx.strokeStyle='#ed2939';ctx.fillStyle='#f2f4f7';ctx.lineWidth=4;const links=[[0,1,2,3,4],[0,5,6,7,8],[5,9,10,11,12],[9,13,14,15,16],[13,17,18,19,20],[0,17]];links.forEach(a=>{ctx.beginPath();a.forEach((id,i)=>{const p=lm[id];if(i===0)ctx.moveTo(p.x*canvas.width,p.y*canvas.height);else ctx.lineTo(p.x*canvas.width,p.y*canvas.height)});ctx.stroke()});lm.forEach(p=>{ctx.beginPath();ctx.arc(p.x*canvas.width,p.y*canvas.height,5,0,Math.PI*2);ctx.fill()})}
 function drawTarget(w){if(!calibrated||!center)return;ctx.strokeStyle='#45d483';ctx.lineWidth=3;ctx.beginPath();ctx.arc(center.x*canvas.width,center.y*canvas.height,Math.min(canvas.width,canvas.height)*movementThreshold,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#45d483';ctx.beginPath();ctx.arc(w.x*canvas.width,w.y*canvas.height,8,0,Math.PI*2);ctx.fill()}
 function fallbackMotion(){try{const c=document.createElement('canvas'),w=80,h=45;c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(video,0,0,w,h);const d=x.getImageData(0,0,w,h).data;let sum=0,n=0;for(let i=0;i<d.length;i+=16){sum+=d[i]+d[i+1]+d[i+2];n++}const avg=sum/(n*3*255);if(prevFrame===null){prevFrame=avg;return null}const delta=Math.abs(avg-prevFrame);prevFrame=avg;if(delta>.012){return {x:.5+Math.min(.2,delta),y:.55}}return lastWrist}catch(e){return null}}
-function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w.y-center.y);if(!goFired&&dist>movementThreshold){falseStarts++;$('falseCount').textContent=falseStarts;trialActive=false;state('FALSE START','bad');setStatus('Movement detected before GO. Reset, settle, and wait for the command.');$('nextBtn').disabled=false;return}if(goFired&&goAt&&dist>movementThreshold*.75){const ms=Math.max(0,performance.now()-goAt);reactionTimes.push(ms);valid++;$('validCount').textContent=valid;$('avgTime').textContent=Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms';trialActive=false;state(Math.round(ms)+' ms','go');setStatus('Movement detected after GO. Valid start recorded.');$('nextBtn').disabled=false;goAt=0}}
+function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w.y-center.y);if(!goFired&&dist>movementThreshold){falseStarts++;$('falseCount').textContent=falseStarts;state('FALSE START','bad');finishTrial('Movement detected before GO. Reset, settle, and wait for the command.');return}if(goFired&&goAt&&dist>movementThreshold*.75){const ms=Math.max(0,performance.now()-goAt);reactionTimes.push(ms);valid++;$('validCount').textContent=valid;$('avgTime').textContent=Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms';state(Math.round(ms)+' ms','go');finishTrial('Movement detected after GO. Valid start recorded.');goAt=0}}
 function speak(text,isGo=false){
  if(!('speechSynthesis'in window)){setStatus('Speech synthesis is unavailable in this browser.');return}
  const u=new SpeechSynthesisUtterance(text);u.lang=$('language').value==='ru'?'ru-RU':'en-US';u.rate=isGo?1.08:(.88+Math.random()*.24);u.pitch=.9+Math.random()*.2;u.volume=1;
@@ -170,11 +171,11 @@ function scheduleTrial(){
  trialActive=mode==='camera';goFired=false;goAt=0;state('LISTEN','ready');$('commandText').textContent='LISTEN';setStatus('Listen carefully. Do not anticipate the start.');
  const seq=commandSequence();let idx=0;
  function sayNext(){if(!running)return;if(idx<seq.length){const c=seq[idx++];$('commandText').textContent=c;if(c===words().ready)repeated++;speak(c);sequenceTimer=setTimeout(sayNext,650+Math.random()*(style==='aggressive'?1050:1500));}
- else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;goFired=true;goAt=performance.now();state(words().go,'go');speak(words().go,true);if(mode==='audio'){setStatus('GO delivered. Audio-only practice: focus on recognition and disciplined response; no movement score.');trialActive=false;$('nextBtn').disabled=false;}else{setStatus('GO. Move from your calibrated ready position.');setTimeout(()=>{if(running&&trialActive&&goFired){missed++;trialActive=false;missedCheck();}},2200)}} ,delay)}
+ else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;goFired=true;goAt=performance.now();state(words().go,'go');speak(words().go,true);if(mode==='audio'){setStatus('GO delivered. Audio-only practice: focus on recognition and disciplined response; no movement score.');finishTrial('Trial complete.');}else{setStatus('GO. Move from your calibrated ready position.');setTimeout(()=>{if(running&&trialActive&&goFired){missed++;trialActive=false;missedCheck();}},2200)}} ,delay)}
  }
  sayNext();
 }
-function missedCheck(){state('NO RESPONSE','bad');setStatus('No movement detected after GO. Review your position and try the next trial.');$('nextBtn').disabled=false}
+function missedCheck(){state('NO RESPONSE','bad');finishTrial('No movement detected after GO. Review your position and prepare for the next trial.')}
 function startSession(){
  if(running)return;total=Number($('length').value);if(mode==='camera'&&(!stream||!calibrated)){setStatus('Camera Mode requires an enabled camera and a ready-position calibration.');return}
  running=true;trial=valid=falseStarts=missed=repeated=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
@@ -182,7 +183,7 @@ function startSession(){
 }
 function nextTrial(){if(!running)return;if(trial>=total){endSession();return}scheduleTrial()}
 function endSession(){
- running=false;trialActive=false;clearTimeout(sequenceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width='100%';state('SESSION COMPLETE','ready');$('commandText').textContent='COMPLETE';
+ running=false;trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width='100%';state('SESSION COMPLETE','ready');$('commandText').textContent='COMPLETE';
  if(mode==='camera'){$('resultsNote').textContent=`${valid} valid starts · ${falseStarts} false starts · ${missed} missed responses. Average measured movement response: ${reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'not available'}. Measurement begins from the browser speech event, not verified acoustic onset.`;setStatus('Session complete. Review the results and refine your discipline.')}
  else{$('validCount').textContent=total;$('falseCount').textContent=repeated;$('avgTime').textContent='—';$('resultsNote').textContent='Audio-only session completed. No physical reaction time or false-start scoring was collected. Repeated setup commands are counted as a measure of sequence complexity.';setStatus('Audio-only session complete. No physical response measurements were recorded.')}
 }
