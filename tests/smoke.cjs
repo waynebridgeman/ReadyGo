@@ -17,7 +17,27 @@ for(const name of ids[0].map(n=>`GO${String(n).padStart(2,'0')}.wav`)){
  assert.equal(b.toString('ascii',0,4),'RIFF',`RIFF ${p}`);
  assert.equal(b.toString('ascii',8,12),'WAVE',`WAVE ${p}`);
  assert(b.length>44,`nonempty audio ${p}`);
+ let fmt=null,dataOffset=-1,dataBytes=0;
+ for(let offset=12;offset+8<=b.length;){
+  const type=b.toString('ascii',offset,offset+4);
+  const bytes=b.readUInt32LE(offset+4);
+  if(type==='fmt '){fmt={
+   codec:b.readUInt16LE(offset+8),
+   channels:b.readUInt16LE(offset+10),
+   sampleRate:b.readUInt32LE(offset+12),
+   sampleBits:b.readUInt16LE(offset+22)
+  }}
+  if(type==='data'){dataOffset=offset+8;dataBytes=bytes;break}
+  offset+=8+bytes+(bytes%2);
+ }
+ assert(fmt,`missing WAV format chunk ${p}`);
+ assert.deepEqual(fmt,{codec:1,channels:1,sampleRate:48000,sampleBits:16},`PCM mono 48kHz 16bit ${p}`);
+ assert(dataOffset>0&&dataBytes>1000&&dataOffset+dataBytes<=b.length,`valid audio data ${p}`);
+ let peak=0;
+ for(let pos=dataOffset;pos+1<dataOffset+dataBytes;pos+=2)peak=Math.max(peak,Math.abs(b.readInt16LE(pos)));
+ assert(peak>500,`silent recording ${p}`);
+ assert(peak<32760,`clipped recording ${p}`);
 }
 assert(!fs.existsSync('audio/ref01/GO08.wav'),'excluded GO08');
 assert(html.includes('visionReady)checkMovement(wrist)'),'hand landmarks required for scoring');
-console.log('PASS: syntax, 19 WAV assets, GO08 exclusion, endurance options, hand-tracking guard');
+console.log('PASS: syntax, 19 PCM mono WAVs/no clipping, GO08 exclusion, endurance options, hand-tracking guard');
