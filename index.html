@@ -70,6 +70,7 @@ footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-heigh
     <div class="field"><label>Language</label><select id="language"><option value="en">English</option><option value="ru" disabled>Russian · coming soon</option><option value="tr" disabled>Turkish · coming soon</option><option value="ro" disabled>Romanian · coming soon</option><option value="pl" disabled>Polish · coming soon</option><option value="ka" disabled>Georgian · coming soon</option><option value="uk" disabled>Ukrainian · coming soon</option><option value="de" disabled>German · coming soon</option><option value="fr" disabled>French · coming soon</option><option value="es" disabled>Spanish · coming soon</option><option value="it" disabled>Italian · coming soon</option><option value="pt" disabled>Portuguese · coming soon</option></select><div class="note">English command set is active in this prototype. Additional language packs require native referee validation and recordings.</div></div>
     <div class="field"><label>Session length</label><select id="length"><option value="10" selected>10 trials</option><option value="20">20 trials</option><option value="30">30 trials</option><option value="40">40 trials</option><option value="50">50 trials</option><option value="60">60 trials</option><option value="70">70 trials</option><option value="80">80 trials</option><option value="90">90 trials</option><option value="100">100 trials</option></select></div>
     <div class="field"><label>Audio environment</label><select id="noise"><option value="off">Clean audio</option><option value="low">Low background noise</option><option value="medium">Moderate background noise</option></select><div class="note">Generated ambient noise is a placeholder, not authentic competition crowd audio.</div></div>
+    <div class="note" id="refStatus" role="status" aria-live="polite">REF01 · 19 real GO commands · loads when the session starts</div>
     <div class="divider"></div>
     <div class="commandBox"><small>REFEREE COMMAND</small><strong id="commandText">WAITING</strong></div>
     <div class="actions"><button id="startBtn" class="primary wide">Start session</button><button id="nextBtn" disabled class="hidden">Next trial</button><button id="stopBtn" disabled>End session</button></div>
@@ -99,11 +100,19 @@ let trial=0,total=10,valid=0,falseStarts=0,missed=0,repeated=0,reactionTimes=[],
 let movementThreshold=.075, detectionSource='fallback motion', advanceTimer=null, missTimer=null, sessionId=0, trialToken=0, completedTrials=0, settledTrialToken=0, lastSeenAt=0;
 const REF01_IDS=[1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20];
 const ref01=new Map();let lastGoId=null, audioCtx=null, activeGoSource=null, goToken=0;
+function updateRefAudioStatus(){
+ $('refStatus').textContent=ref01.size===REF01_IDS.length
+  ?'REF01 ACTIVE · all 19 authentic GO recordings loaded'
+  :ref01.size>0
+   ?`REF01 PARTIAL · ${ref01.size}/19 recordings loaded`
+   :'REF01 UNAVAILABLE · browser voice fallback is active';
+}
 async function preloadRef01(){
- if(ref01.size===REF01_IDS.length&&audioCtx){await audioCtx.resume();return}
+ if(ref01.size===REF01_IDS.length&&audioCtx){await audioCtx.resume();updateRefAudioStatus();return}
  try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();
   await Promise.all(REF01_IDS.map(async id=>{const name=`GO${String(id).padStart(2,'0')}.wav`;try{const res=await fetch(`audio/ref01/${name}`);if(!res.ok)throw Error(res.status);const data=await res.arrayBuffer();ref01.set(id,await audioCtx.decodeAudioData(data))}catch(e){console.warn('REF01 missing:',name,e)}}));
  }catch(e){console.warn('REF01 audio unavailable',e)}
+ updateRefAudioStatus();
 }
 function playRecordedGo(){
  if(!running||!audioCtx||audioCtx.state!=='running')return false;
