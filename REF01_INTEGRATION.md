@@ -1,19 +1,23 @@
-# REF01 audio integration (v0.5.0 draft)
+# REF01 integration — v0.5.0 draft
 
-Place the 19 WAV assets from ReadyGo_REF01_Production_19_GO.zip under `audio/ref01/` with names `GO01.wav` through `GO20.wav`, excluding `GO08.wav`. The application preloads them at session start, selects randomly, and avoids immediately repeating the same take. If no clips load, browser speech remains a fallback.
+## Asset status: COMPLETE
+The branch contains 19 individually trimmed, mono WAV assets under `audio/ref01/`: `GO01.wav`–`GO07.wav` and `GO09.wav`–`GO20.wav`. `GO08.wav` ("And go!") is deliberately excluded.
 
-## Important validation
-- The recorded GO start is scheduled using Web Audio clock and a nominal 35 ms lead. This is **not** calibrated acoustic output latency. Do not claim millisecond-accurate reaction measurements until device-level validation.
-- Setup commands still use speech synthesis. Their timing must be reviewed to avoid overlap with GO.
-- Camera tracking and fallback remain unchanged. The experimental whole-frame fallback must not be presented as reliable hand/wrist timing.
-- Test all session lengths 10–100 on iPhone, including automatic 2-second trial advancement, early movement, stop/restart, and missing assets.
-- This branch contains the playback code, not yet the binary WAV assets. Add those before merging.
+The audio engine preloads each clip, selects a randomized take without immediate repetition, and schedules GO playback using Web Audio. The REF01 production manifest estimates 12 ms from each WAV's first sample to the audible GO onset. This is a **waveform-based estimate only**, not an output-hardware calibration. Web Audio output timestamps are used where available, with performance-clock estimation as the fallback.
 
-## Review checklist (not yet device-tested)
-- Verify all 19 WAV requests return HTTP 200 and decode in Safari.
-- Verify recorded GO is audible and setup TTS does not overlap.
-- Test early movement before GO, valid movement after GO, and no movement for 2.2 seconds.
-- Test 10 and 100 trial sessions, automatic 2-second transition, and stop/restart mid-session.
-- Test camera permission denial and MediaPipe model failure: scoring must not start.
-- Compare measured reaction with external high-speed video or a controlled timing fixture before claiming accuracy.
-- Keep PR as draft until manual tests pass.
+## Automated tests: PASSING (Chrome simulated)
+- JavaScript syntax and all 19 WAV presence and RIFF/WAVE headers.
+- Audio-Only 10-trial simulation, fallback speech, no false-start or reaction-time scoring.
+- Chrome loads/decodes 19 WAVs and plays a recorded GO.
+- Automatic two-second transition and clean cancellation after Stop.
+- Simulated MediaPipe hand landmarks: early displacement produces FALSE START and post-GO displacement produces a valid timed result.
+- Camera access turns off on switch to Audio-Only.
+
+## Release blockers: PHYSICAL DEVICE VALIDATION
+- Check 10 and 100 trial sessions in iPhone Safari, including speaker versus Bluetooth output and volume adjustments.
+- Confirm GO audible onset and reaction-time reference with an external fixture/high-speed reference; mobile audio and camera latency can affect scores.
+- Manually listen to all 19 WAV files for trimmed consonant attacks and level consistency.
+- Test actual MediaPipe GPU/CPU fallback, camera calibration, hand tracking near the table, occlusion, lighting, and low-power conditions.
+- Validate microphone/camera permissions and reliable cleanup on backgrounding/returning to app.
+
+**Do not merge this PR into main until the real-device checks are completed.** The automated test's hand movement is synthetic, not a physical-camera accuracy result.
