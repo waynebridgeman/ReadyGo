@@ -96,22 +96,23 @@ const video=$('video'), canvas=$('overlay'), ctx=canvas.getContext('2d');
 let mode='camera', training='progressive', style='strict', stream=null, running=false, calibrated=false;
 let handLandmarker=null, visionReady=false, detectorBusy=false, raf=0, lastWrist=null, baseline=null, center=null;
 let trial=0,total=10,valid=0,falseStarts=0,missed=0,repeated=0,reactionTimes=[],goAt=0,goFired=false,trialActive=false,sequenceTimer=null,noiseNode=null,noiseGain=null;
-let movementThreshold=.075, detectionSource='fallback motion', advanceTimer=null;
+let movementThreshold=.075, detectionSource='fallback motion', advanceTimer=null, missTimer=null, sessionId=0;
 const REF01_IDS=[1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20];
 const ref01=new Map();let lastGoId=null, audioCtx=null, activeGoSource=null, goToken=0;
 async function preloadRef01(){
+ if(ref01.size===REF01_IDS.length&&audioCtx){await audioCtx.resume();return}
  try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();
   await Promise.all(REF01_IDS.map(async id=>{const name=`GO${String(id).padStart(2,'0')}.wav`;try{const res=await fetch(`audio/ref01/${name}`);if(!res.ok)throw Error(res.status);const data=await res.arrayBuffer();ref01.set(id,await audioCtx.decodeAudioData(data))}catch(e){console.warn('REF01 missing:',name,e)}}));
  }catch(e){console.warn('REF01 audio unavailable',e)}
 }
 function playRecordedGo(){
- if(!running)return false;
+ if(!running||!audioCtx)return false;
  const ids=REF01_IDS.filter(id=>ref01.has(id)&&id!==lastGoId);if(!ids.length)return false;
  const id=ids[Math.floor(Math.random()*ids.length)];lastGoId=id;
  if('speechSynthesis'in window)speechSynthesis.cancel();const src=audioCtx.createBufferSource();src.buffer=ref01.get(id);src.connect(audioCtx.destination);
  const onset=audioCtx.currentTime+.035;src.start(onset);activeGoSource=src;
  const token=++goToken;const expected=performance.now()+35;
- setTimeout(()=>{if(!running||token!==goToken||(!trialActive&&mode==='camera'))return;goAt=expected;goFired=true;state(words().go,'go');$('commandText').textContent=words().go;if(mode==='audio'){setStatus('GO delivered. Listen and hit; no reaction-time scoring.');finishTrial('Trial complete.');}},35);
+ setTimeout(()=>{if(!running||token!==goToken||(!trialActive&&mode==='camera'))return;goAt=expected;goFired=true;state(words().go,'go');$('commandText').textContent=words().go;if(mode==='audio'){setStatus('GO delivered. Listen and hit; no reaction-time scoring.');setTimeout(()=>{if(running&&token===goToken)finishTrial('Trial complete.');},Math.ceil(src.buffer.duration*1000));}else{clearTimeout(missTimer);missTimer=setTimeout(()=>{if(running&&trialActive&&goFired){missed++;missedCheck()}},2200);}},35);
  return true;
 }
 
@@ -122,7 +123,7 @@ ro:{ready:"PREGĂTIT",dont:"NU MIȘCA",elbow:"COTUL JOS",wrist:"ÎNCHEIETURĂ",s
 pl:{ready:"GOTOWY",dont:"NIE RUSZAJ SIĘ",elbow:"ŁOKIEĆ W DÓŁ",wrist:"NADGARSTEK",set:"START",go:"GO"}};
 function words(){return translations[$('language').value]||translations.en}
 function setStatus(s){$('status').textContent=s}
-function finishTrial(message){trialActive=false;$('nextBtn').disabled=true;setStatus(message+' Next trial in 2 seconds…');clearTimeout(advanceTimer);advanceTimer=setTimeout(()=>{if(running){if(trial>=total)endSession();else scheduleTrial()}},2000)}
+function finishTrial(message){trialActive=false;clearTimeout(missTimer);$('nextBtn').disabled=true;setStatus(message+' Next trial in 2 seconds…');clearTimeout(advanceTimer);advanceTimer=setTimeout(()=>{if(running){if(trial>=total)endSession();else scheduleTrial()}},2000)}
 function state(s,kind='ready'){$('stateText').textContent=s;$('stateText').className='state '+kind}
 function setMode(m){if(running)return;mode=m;$('cameraMode').classList.toggle('active',m==='camera');$('audioMode').classList.toggle('active',m==='audio');$('cameraButtons').classList.toggle('hidden',m==='audio');$('audioModeMessage').classList.toggle('hidden',m!=='audio');$('videoWrap').classList.toggle('hidden',m==='audio');$('visualTitle').textContent=m==='camera'?'Camera training · live tracking':'Audio-only training';$('modeNote').textContent=m==='camera'?'Physical movement, false starts and response timing are measured from camera tracking.':'Auditory practice only. No physical reaction-time or false-start scoring.';$('metricOneLabel').textContent=m==='camera'?'Valid starts':'Trials completed';$('metricTwoLabel').textContent=m==='camera'?'False starts':'Commands repeated';$('metricThreeLabel').textContent=m==='camera'?'Avg. response':'Listening focus';$('validCount').textContent='—';$('falseCount').textContent='—';$('avgTime').textContent='—';}
 function setTraining(t){if(running)return;training=t;$('progressive').classList.toggle('active',t==='progressive');$('competition').classList.toggle('active',t==='competition')}
@@ -156,7 +157,7 @@ function loop(){
   if(visionReady&&handLandmarker&&!detectorBusy){
    detectorBusy=true;try{const res=handLandmarker.detectForVideo(video,performance.now());if(res.landmarks&&res.landmarks[0]){const lm=res.landmarks[0];wrist={x:lm[0].x,y:lm[0].y};drawHand(lm)}}catch(e){}detectorBusy=false;
   } else if(!visionReady){wrist=fallbackMotion()}
-  if(wrist){lastWrist=wrist;drawTarget(wrist);if(running&&trialActive&&mode==='camera'&&calibrated)checkMovement(wrist)}
+  if(wrist){lastWrist=wrist;drawTarget(wrist);if(running&&trialActive&&mode==='camera'&&calibrated&&visionReady)checkMovement(wrist)}
  }
  raf=requestAnimationFrame(loop);
 }
@@ -167,7 +168,7 @@ function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w
 function speak(text,isGo=false){
  if(!('speechSynthesis'in window)){setStatus('Speech synthesis is unavailable in this browser.');return}
  const u=new SpeechSynthesisUtterance(text);u.lang=$('language').value==='ru'?'ru-RU':'en-US';u.rate=isGo?1.08:(.88+Math.random()*.24);u.pitch=.9+Math.random()*.2;u.volume=1;
- if(isGo){u.onstart=()=>{if(!running)return;goAt=performance.now();goFired=true;state(words().go,'go');$('commandText').textContent=words().go;if(mode==='audio'){setStatus('GO delivered. Listen and hit; no reaction-time scoring.');finishTrial('Trial complete.')}};}
+ if(isGo){u.onstart=()=>{if(!running)return;goAt=performance.now();goFired=true;state(words().go,'go');$('commandText').textContent=words().go;if(mode==='audio'){setStatus('GO delivered. Listen and hit; no reaction-time scoring.');u.onend=()=>{if(running)finishTrial('Trial complete.')};}else{clearTimeout(missTimer);missTimer=setTimeout(()=>{if(running&&trialActive&&goFired){missed++;missedCheck()}},2200)}};}
  speechSynthesis.speak(u);
 }
 function noiseStart(){noiseStop();const level=$('noise').value;if(level==='off')return;try{const ac=new(window.AudioContext||window.webkitAudioContext)();const buffer=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1);const src=ac.createBufferSource();src.buffer=buffer;src.loop=true;const filter=ac.createBiquadFilter();filter.type='lowpass';filter.frequency.value=level==='low'?500:1100;const gain=ac.createGain();gain.gain.value=level==='low'?.012:.025;src.connect(filter);filter.connect(gain);gain.connect(ac.destination);src.start();noiseNode={src,ac};}catch(e){}}
@@ -189,20 +190,20 @@ function scheduleTrial(){
  trialActive=mode==='camera';goFired=false;goAt=0;state('LISTEN','ready');$('commandText').textContent='LISTEN';setStatus('Listen carefully. Do not anticipate the start.');
  const seq=commandSequence();let idx=0;
  function sayNext(){if(!running)return;if(idx<seq.length){const c=seq[idx++];$('commandText').textContent=c;if(c===words().ready)repeated++;speak(c);sequenceTimer=setTimeout(sayNext,650+Math.random()*(style==='aggressive'?1050:1500));}
- else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;if(!playRecordedGo())speak(words().go,true);if(mode==='camera'){setStatus('GO pending. Move only when you hear the command.');setTimeout(()=>{if(running&&trialActive&&goFired){missed++;trialActive=false;missedCheck();}},2600)}} ,delay)}
+ else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;if(!playRecordedGo())speak(words().go,true);if(mode==='camera'){setStatus('GO pending. Move only when you hear the command.')}} ,delay)}
  }
  sayNext();
 }
 function missedCheck(){state('NO RESPONSE','bad');finishTrial('No movement detected after GO. Review your position and prepare for the next trial.')}
 function startSession(){
- if(running)return;total=Number($('length').value);if(mode==='camera'&&(!stream||!calibrated)){setStatus('Camera Mode requires an enabled camera and a ready-position calibration.');return}
- running=true;trial=valid=falseStarts=missed=repeated=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
- ['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=true);noiseStart();setStatus('Loading REF01 audio…');preloadRef01().then(()=>{if(running)scheduleTrial()});
+ if(running)return;total=Number($('length').value);if(mode==='camera'&&(!stream||!calibrated||!visionReady)){setStatus('Camera Mode requires active hand-landmark tracking and ready-position calibration; experimental frame motion is not valid for reaction scoring.');return}
+ running=true;const thisSession=++sessionId;trial=valid=falseStarts=missed=repeated=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
+ ['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=true);noiseStart();setStatus('Loading REF01 audio…');preloadRef01().then(()=>{if(running&&thisSession===sessionId)scheduleTrial()});
 }
 function nextTrial(){if(!running)return;if(trial>=total){endSession();return}scheduleTrial()}
 function endSession(){
- running=false;goToken++;if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width='100%';state('SESSION COMPLETE','ready');$('commandText').textContent='COMPLETE';
- if(mode==='camera'){$('resultsNote').textContent=`${valid} valid starts · ${falseStarts} false starts · ${missed} missed responses. Average measured movement response: ${reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'not available'}. Measurement begins from the browser speech event, not verified acoustic onset.`;setStatus('Session complete. Review the results and refine your discipline.')}
+ running=false;sessionId++;goToken++;clearTimeout(missTimer);if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width='100%';state('SESSION COMPLETE','ready');$('commandText').textContent='COMPLETE';
+ if(mode==='camera'){$('resultsNote').textContent=`${valid} valid starts · ${falseStarts} false starts · ${missed} missed responses. Average measured movement response: ${reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'not available'}. Timing uses estimated scheduled playback onset (or speech event fallback), not verified acoustic onset. Camera frame timestamps and device audio latency are not calibrated.`;setStatus('Session complete. Review the results and refine your discipline.')}
  else{$('validCount').textContent=total;$('falseCount').textContent=repeated;$('avgTime').textContent='—';$('resultsNote').textContent='Audio-only session completed. No physical reaction time or false-start scoring was collected. Repeated setup commands are counted as a measure of sequence complexity.';setStatus('Audio-only session complete. No physical response measurements were recorded.')}
 }
 $('startBtn').onclick=startSession;$('nextBtn').onclick=nextTrial;$('stopBtn').onclick=endSession;
