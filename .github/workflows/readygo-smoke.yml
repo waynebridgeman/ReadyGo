@@ -1,16 +1,21 @@
-name: ReadyGo smoke tests
+name: ReadyGo regression tests
 on:
-  push:
-    branches: [feature/ref01-audio-engine-v050]
   pull_request:
     branches: [main]
 jobs:
-  smoke:
+  test:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node tests/smoke.cjs
-      - run: node tests/session.cjs
+      - name: Static assets and JavaScript syntax
+        run: node tests/smoke.cjs
+      - name: Session lifecycle simulation
+        run: node tests/session.cjs
+      - name: Install browser automation
+        run: npm install --no-audit --no-fund
+      - name: Chrome playback and controls
+        run: node tests/browser.cjs
