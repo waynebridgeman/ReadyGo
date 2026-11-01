@@ -96,7 +96,7 @@ const video=$('video'), canvas=$('overlay'), ctx=canvas.getContext('2d');
 let mode='camera', training='progressive', style='strict', stream=null, running=false, calibrated=false;
 let handLandmarker=null, visionReady=false, detectorBusy=false, raf=0, lastWrist=null, baseline=null, center=null;
 let trial=0,total=10,valid=0,falseStarts=0,missed=0,repeated=0,reactionTimes=[],goAt=0,goFired=false,trialActive=false,sequenceTimer=null,noiseNode=null,noiseGain=null;
-let movementThreshold=.075, detectionSource='fallback motion', advanceTimer=null, missTimer=null, sessionId=0;
+let movementThreshold=.075, detectionSource='fallback motion', advanceTimer=null, missTimer=null, sessionId=0, trialToken=0;
 const REF01_IDS=[1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20];
 const ref01=new Map();let lastGoId=null, audioCtx=null, activeGoSource=null, goToken=0;
 async function preloadRef01(){
@@ -123,7 +123,7 @@ ro:{ready:"PREGĂTIT",dont:"NU MIȘCA",elbow:"COTUL JOS",wrist:"ÎNCHEIETURĂ",s
 pl:{ready:"GOTOWY",dont:"NIE RUSZAJ SIĘ",elbow:"ŁOKIEĆ W DÓŁ",wrist:"NADGARSTEK",set:"START",go:"GO"}};
 function words(){return translations[$('language').value]||translations.en}
 function setStatus(s){$('status').textContent=s}
-function finishTrial(message){trialActive=false;clearTimeout(missTimer);$('nextBtn').disabled=true;setStatus(message+' Next trial in 2 seconds…');clearTimeout(advanceTimer);advanceTimer=setTimeout(()=>{if(running){if(trial>=total)endSession();else scheduleTrial()}},2000)}
+function finishTrial(message){if(!running)return;trialActive=false;clearTimeout(missTimer);clearTimeout(sequenceTimer);if('speechSynthesis'in window)speechSynthesis.cancel();$('nextBtn').disabled=true;setStatus(message+' Next trial in 2 seconds…');clearTimeout(advanceTimer);advanceTimer=setTimeout(()=>{if(running){if(trial>=total)endSession();else scheduleTrial()}},2000)}
 function state(s,kind='ready'){$('stateText').textContent=s;$('stateText').className='state '+kind}
 function setMode(m){if(running)return;mode=m;$('cameraMode').classList.toggle('active',m==='camera');$('audioMode').classList.toggle('active',m==='audio');$('cameraButtons').classList.toggle('hidden',m==='audio');$('audioModeMessage').classList.toggle('hidden',m!=='audio');$('videoWrap').classList.toggle('hidden',m==='audio');$('visualTitle').textContent=m==='camera'?'Camera training · live tracking':'Audio-only training';$('modeNote').textContent=m==='camera'?'Physical movement, false starts and response timing are measured from camera tracking.':'Auditory practice only. No physical reaction-time or false-start scoring.';$('metricOneLabel').textContent=m==='camera'?'Valid starts':'Trials completed';$('metricTwoLabel').textContent=m==='camera'?'False starts':'Commands repeated';$('metricThreeLabel').textContent=m==='camera'?'Avg. response':'Listening focus';$('validCount').textContent='—';$('falseCount').textContent='—';$('avgTime').textContent='—';}
 function setTraining(t){if(running)return;training=t;$('progressive').classList.toggle('active',t==='progressive');$('competition').classList.toggle('active',t==='competition')}
@@ -164,7 +164,7 @@ function loop(){
 function drawHand(lm){ctx.strokeStyle='#ed2939';ctx.fillStyle='#f2f4f7';ctx.lineWidth=4;const links=[[0,1,2,3,4],[0,5,6,7,8],[5,9,10,11,12],[9,13,14,15,16],[13,17,18,19,20],[0,17]];links.forEach(a=>{ctx.beginPath();a.forEach((id,i)=>{const p=lm[id];if(i===0)ctx.moveTo(p.x*canvas.width,p.y*canvas.height);else ctx.lineTo(p.x*canvas.width,p.y*canvas.height)});ctx.stroke()});lm.forEach(p=>{ctx.beginPath();ctx.arc(p.x*canvas.width,p.y*canvas.height,5,0,Math.PI*2);ctx.fill()})}
 function drawTarget(w){if(!calibrated||!center)return;ctx.strokeStyle='#45d483';ctx.lineWidth=3;ctx.beginPath();ctx.arc(center.x*canvas.width,center.y*canvas.height,Math.min(canvas.width,canvas.height)*movementThreshold,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#45d483';ctx.beginPath();ctx.arc(w.x*canvas.width,w.y*canvas.height,8,0,Math.PI*2);ctx.fill()}
 function fallbackMotion(){try{const c=document.createElement('canvas'),w=80,h=45;c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(video,0,0,w,h);const d=x.getImageData(0,0,w,h).data;let sum=0,n=0;for(let i=0;i<d.length;i+=16){sum+=d[i]+d[i+1]+d[i+2];n++}const avg=sum/(n*3*255);if(prevFrame===null){prevFrame=avg;return null}const delta=Math.abs(avg-prevFrame);prevFrame=avg;if(delta>.012){return {x:.5+Math.min(.2,delta),y:.55}}return lastWrist}catch(e){return null}}
-function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w.y-center.y);if(!goFired&&dist>movementThreshold){goToken++;if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}falseStarts++;$('falseCount').textContent=falseStarts;state('FALSE START','bad');finishTrial('Movement detected before GO. Reset, settle, and wait for the command.');return}if(goFired&&goAt&&dist>movementThreshold*.75){const ms=Math.max(0,performance.now()-goAt);reactionTimes.push(ms);valid++;$('validCount').textContent=valid;$('avgTime').textContent=Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms';state(Math.round(ms)+' ms','go');finishTrial('Movement detected after GO. Valid start recorded.');goAt=0}}
+function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w.y-center.y);if(!goFired&&dist>movementThreshold){trialToken++;goToken++;if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}falseStarts++;$('falseCount').textContent=falseStarts;state('FALSE START','bad');finishTrial('Movement detected before GO. Reset, settle, and wait for the command.');return}if(goFired&&goAt&&dist>movementThreshold*.75){const ms=Math.max(0,performance.now()-goAt);reactionTimes.push(ms);valid++;$('validCount').textContent=valid;$('avgTime').textContent=Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms';state(Math.round(ms)+' ms','go');finishTrial('Movement detected after GO. Valid start recorded.');goAt=0}}
 function speak(text,isGo=false){
  if(!('speechSynthesis'in window)){setStatus('Speech synthesis is unavailable in this browser.');return}
  const u=new SpeechSynthesisUtterance(text);u.lang=$('language').value==='ru'?'ru-RU':'en-US';u.rate=isGo?1.08:(.88+Math.random()*.24);u.pitch=.9+Math.random()*.2;u.volume=1;
@@ -186,12 +186,13 @@ function commandSequence(){
 }
 function scheduleTrial(){
  if(!running)return;
+ const currentTrial=++trialToken;
  if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}
  trial++;$('trialBadge').textContent=`TRIAL ${trial} / ${total}`;$('progressBar').style.width=((trial-1)/total*100)+'%';$('nextBtn').disabled=true;
  trialActive=mode==='camera';goFired=false;goAt=0;state('LISTEN','ready');$('commandText').textContent='LISTEN';setStatus('Listen carefully. Do not anticipate the start.');
  const seq=commandSequence();let idx=0;
- function sayNext(){if(!running)return;if(idx<seq.length){const c=seq[idx++];$('commandText').textContent=c;if(c===words().ready)repeated++;speak(c);sequenceTimer=setTimeout(sayNext,650+Math.random()*(style==='aggressive'?1050:1500));}
- else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;if(!playRecordedGo())speak(words().go,true);if(mode==='camera'){setStatus('GO pending. Move only when you hear the command.')}} ,delay)}
+ function sayNext(){if(!running||currentTrial!==trialToken)return;if(idx<seq.length){const c=seq[idx++];$('commandText').textContent=c;if(c===words().ready)repeated++;speak(c);sequenceTimer=setTimeout(sayNext,650+Math.random()*(style==='aggressive'?1050:1500));}
+ else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running||currentTrial!==trialToken)return;$('commandText').textContent=words().go;if(!playRecordedGo())speak(words().go,true);if(mode==='camera'){setStatus('GO pending. Move only when you hear the command.')}} ,delay)}
  }
  sayNext();
 }
@@ -203,7 +204,7 @@ function startSession(){
 }
 function nextTrial(){if(!running)return;if(trial>=total){endSession();return}scheduleTrial()}
 function endSession(){
- running=false;sessionId++;goToken++;clearTimeout(missTimer);if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width='100%';state('SESSION COMPLETE','ready');$('commandText').textContent='COMPLETE';
+ running=false;sessionId++;trialToken++;goToken++;clearTimeout(missTimer);if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width='100%';state('SESSION COMPLETE','ready');$('commandText').textContent='COMPLETE';
  if(mode==='camera'){$('resultsNote').textContent=`${valid} valid starts · ${falseStarts} false starts · ${missed} missed responses. Average measured movement response: ${reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'not available'}. Timing uses estimated scheduled playback onset (or speech event fallback), not verified acoustic onset. Camera frame timestamps and device audio latency are not calibrated.`;setStatus('Session complete. Review the results and refine your discipline.')}
  else{$('validCount').textContent=total;$('falseCount').textContent=repeated;$('avgTime').textContent='—';$('resultsNote').textContent='Audio-only session completed. No physical reaction time or false-start scoring was collected. Repeated setup commands are counted as a measure of sequence complexity.';setStatus('Audio-only session complete. No physical response measurements were recorded.')}
 }
