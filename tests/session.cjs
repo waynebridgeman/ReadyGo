@@ -67,7 +67,7 @@ async function simulate({noAudio=false,stopEarly=false,trials=10}={}){
  const win={AudioContext,webkitAudioContext:AudioContext,speechSynthesis:synth,addEventListener(){}};
  const fakeMath=Object.create(Math);fakeMath.random=()=>.99;
  const sandbox={
-  document:{getElementById:el,createElement:()=>el('__scratch')},
+  document:{getElementById:el,createElement:()=>el('__scratch'),body:el('__body')},
   window:win, speechSynthesis:synth,SpeechSynthesisUtterance:class{constructor(t){this.text=t}},
   navigator:{mediaDevices:{}},requestAnimationFrame:()=>0,cancelAnimationFrame:()=>{},
   setTimeout:queue,clearTimeout:cancel,performance:{now:()=>now},
