@@ -105,7 +105,7 @@ export const HandLandmarker={createFromOptions:async()=>({
   assert.equal(await studio.locator('#clips audio').count(),1,'reviewable audio is captured');
   const [saved]=await Promise.all([studio.waitForEvent('download',{timeout:10000}),studio.locator('#downloadAll').click()]);
   const zipped=fs.readFileSync(await saved.path());
-  assert.equal(zipped.toString('ascii',0,4),'PK\\x03\\x04'.replace(/\\\\x03/g,'\\x03').replace(/\\\\x04/g,'\\x04'),'ZIP signature');
+  assert.equal(zipped.readUInt32LE(0),0x04034b50,'ZIP signature');
   assert(zipped.includes(Buffer.from('REF02_GO_take01.')),'recorded take in exported ZIP');
   assert(zipped.includes(Buffer.from('batch_manifest.json')),'batch metadata in exported ZIP');
   assert.deepEqual(studioErrors,[],'recorder browser has no script errors');
