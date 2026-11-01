@@ -1,28 +1,33 @@
-READYGO v0.4.1 — Integrated prototype
+# ReadyGo v0.5.0 (release candidate, not yet deployed)
 
-WHAT'S NEW
-- Brings the training engine and camera mode together.
-- Progressive Training and Competition Simulation.
-- Strict Progression and Aggressive Referee styles.
-- Stateful command sequences with repeats and returns to earlier setup commands.
-- Camera Mode with ready-position calibration and hand landmark tracking (MediaPipe loaded from a CDN).
-- Experimental frame-motion fallback if the hand landmark model cannot load.
-- Audio-only mode for auditory discipline; it does not score physical reaction time or false starts.
-- English command audio plus a multilingual language selector scaffold.
+ReadyGo is a browser-based armwrestling referee-cue training app designed for mobile Safari and modern desktop browsers. This branch is a **development release**, not a native iOS application. The live `main` branch remains at the previous release.
 
-IMPORTANT LIMITATIONS
-- Browser speech synthesis is still a temporary voice placeholder, not authentic referee recordings.
-- Generated background noise is not real competition crowd audio.
-- Camera tracking is a prototype, not a certified measurement system. Results depend on camera angle, lighting, device performance, and hand visibility.
-- Reaction timing is referenced to the browser speech-synthesis start event, not verified acoustic onset. Do not treat it as competition-grade timing.
-- Only English command flow is fully implemented in this prototype. Other language selections are scaffolding and need native referee validation.
-- The fallback motion detector is experimental and is not hand/wrist tracking.
-- MediaPipe requires internet access in the browser to load its model assets.
+## Modes
+- **Camera Mode:** live camera, MediaPipe hand/wrist landmarks, ready-position calibration, false-start detection, approximate visual reaction-time scoring and on-camera session feedback. Requires active landmark tracking. A whole-frame fallback exists for visual diagnostics but cannot generate valid scores.
+- **Audio-Only Mode:** referee listening/discipline and explosive-hit practice. Does **not** measure physical reaction time or false starts. Switching to Audio-Only turns off the camera.
 
-DEPLOY
-1. Extract the ZIP.
-2. Upload index.html to the root of your existing GitHub Pages repository, replacing the old index.html.
-3. Commit the change.
-4. Wait for the Pages deployment to complete, then hard-refresh the site (Ctrl+Shift+R).
+## Referee audio
+- REF01 includes **19 genuine GO recordings** at `audio/ref01/GO01.wav` through `GO20.wav`, excluding `GO08.wav` (which contained "And go!").
+- WAV assets are preloaded before each session, shuffled across trials and never repeated on immediately consecutive selections. Browser speech can fall back when the recorded files fail to load.
+- The audible GO and on-screen GO indicators are scheduled together. The REF01 clips have an estimated 12 ms lead-in after trimming, **not** verified microphone-level or hardware-calibrated latency.
+- Setup commands remain temporary English speech synthesis. Other languages are disabled until verified native audio exists.
 
-For camera access, use the HTTPS GitHub Pages URL and allow camera permission.
+## Sessions
+- Select 10, 20, ... 100 trials.
+- Two-second automatic advancement after each completed attempt. No manual Next Trial click.
+- Progressive and competition timing profiles, strict and aggressive setup sequences, and optional synthesized background noise.
+
+## Development testing
+- `node tests/smoke.cjs`: validates JS syntax, GO assets, endurance options, and hand-scoring guard.
+- `node tests/session.cjs`: deterministic Audio-Only 10-trial simulation with recorded playback, speech fallback, and stop behavior.
+- `npm install && node tests/browser.cjs`: headless Chrome test of WAV loading/playback, automatic progression, stopping, and simulated hand-landmark false/valid starts.
+
+The GitHub Actions pull-request workflow runs all three checks. Browser hand landmarks in the test are simulated; the tests do **not** certify real camera tracking or response-time accuracy.
+
+## Before merge
+1. Test a 10-trial and 100-trial session on physical iPhone Safari (camera permissions, audio routing, volume, screen lock, and stop/restart).
+2. Verify actual GO onset and audio-output latency with a controlled timing reference; compare timestamps to camera capture latency.
+3. Manually listen to each of the 19 WAV recordings for clipped consonants and loudness disparities.
+4. Verify MediaPipe tracking, calibration, false starts, hand occlusion, and device heating/battery impact.
+
+**Keep pull request #1 as a draft until these device-level checks pass.**

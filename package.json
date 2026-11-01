@@ -1,0 +1,13 @@
+{
+  "name": "readygo",
+  "private": true,
+  "version": "0.5.0",
+  "description": "ReadyGo static armwrestling reaction trainer; package used only for development tests.",
+  "scripts": {
+    "test": "node tests/smoke.cjs && node tests/session.cjs",
+    "test:browser": "node tests/browser.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.57.0"
+  }
+}

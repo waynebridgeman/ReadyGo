@@ -1,0 +1,21 @@
+name: ReadyGo regression tests
+on:
+  pull_request:
+    branches: [main]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static assets and JavaScript syntax
+        run: node tests/smoke.cjs
+      - name: Session lifecycle simulation
+        run: node tests/session.cjs
+      - name: Install browser automation
+        run: npm install --no-audit --no-fund
+      - name: Chrome playback and controls
+        run: node tests/browser.cjs

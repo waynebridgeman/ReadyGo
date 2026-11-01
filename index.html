@@ -43,7 +43,7 @@ footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-heigh
 </head>
 <body>
 <div class="wrap">
- <header class="top"><div><div class="brand">READY<span>GO</span></div><div class="tag">HEAR IT. RECOGNIZE IT. HIT IT.</div></div><div class="pill">TRAINING BUILD · v0.4</div></header>
+ <header class="top"><div><div class="brand">READY<span>GO</span></div><div class="tag">HEAR IT. RECOGNIZE IT. HIT IT.</div></div><div class="pill">TRAINING BUILD · v0.5</div></header>
  <h1>Train the <em>recognition.</em><br>Own the start.</h1>
  <p class="sub">A referee-start training environment for armwrestlers. Learn to listen, stay disciplined through setup changes, and respond when the GO actually comes.</p>
  <div class="layout">
@@ -67,9 +67,10 @@ footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-heigh
     <div class="field"><label>Measurement mode</label><div class="segment"><button id="cameraMode" class="active">Camera mode</button><button id="audioMode">Audio-only</button></div><div class="note" id="modeNote">Physical movement, false starts and response timing are measured from camera tracking.</div></div>
     <div class="field"><label>Training mode</label><div class="segment"><button id="progressive" class="active">Progressive training</button><button id="competition">Competition simulation</button></div></div>
     <div class="field"><label>Referee style</label><div class="segment"><button id="strict" class="active">Strict progression</button><button id="aggressive">Aggressive referee</button></div></div>
-    <div class="field"><label>Language</label><select id="language"><option value="en">English</option><option value="ru">Russian</option><option value="tr">Turkish</option><option value="ro">Romanian</option><option value="pl">Polish</option><option value="ka">Georgian</option><option value="uk">Ukrainian</option><option value="de">German</option><option value="fr">French</option><option value="es">Spanish</option><option value="it">Italian</option><option value="pt">Portuguese</option></select><div class="note">English command set is active in this prototype. Additional language packs require native referee validation and recordings.</div></div>
-    <div class="field"><label>Session length</label><select id="length"><option value="5">5 trials · quick set</option><option value="10" selected>10 trials · standard</option><option value="15">15 trials · extended</option></select></div>
+    <div class="field"><label>Language</label><select id="language"><option value="en">English</option><option value="ru" disabled>Russian · coming soon</option><option value="tr" disabled>Turkish · coming soon</option><option value="ro" disabled>Romanian · coming soon</option><option value="pl" disabled>Polish · coming soon</option><option value="ka" disabled>Georgian · coming soon</option><option value="uk" disabled>Ukrainian · coming soon</option><option value="de" disabled>German · coming soon</option><option value="fr" disabled>French · coming soon</option><option value="es" disabled>Spanish · coming soon</option><option value="it" disabled>Italian · coming soon</option><option value="pt" disabled>Portuguese · coming soon</option></select><div class="note">English command set is active in this prototype. Additional language packs require native referee validation and recordings.</div></div>
+    <div class="field"><label>Session length</label><select id="length"><option value="10" selected>10 trials</option><option value="20">20 trials</option><option value="30">30 trials</option><option value="40">40 trials</option><option value="50">50 trials</option><option value="60">60 trials</option><option value="70">70 trials</option><option value="80">80 trials</option><option value="90">90 trials</option><option value="100">100 trials</option></select></div>
     <div class="field"><label>Audio environment</label><select id="noise"><option value="off">Clean audio</option><option value="low">Low background noise</option><option value="medium">Moderate background noise</option></select><div class="note">Generated ambient noise is a placeholder, not authentic competition crowd audio.</div></div>
+    <div class="note" id="refStatus" role="status" aria-live="polite">REF01 · 19 real GO commands · loads when the session starts</div>
     <div class="divider"></div>
     <div class="commandBox"><small>REFEREE COMMAND</small><strong id="commandText">WAITING</strong></div>
     <div class="actions"><button id="startBtn" class="primary wide">Start session</button><button id="nextBtn" disabled class="hidden">Next trial</button><button id="stopBtn" disabled>End session</button></div>
@@ -87,7 +88,7 @@ footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-heigh
   </div>
   <div class="note" id="resultsNote" style="margin-top:10px">Camera mode reports movement-based measurements. Audio-only sessions focus on listening discipline and do not calculate physical reaction time or false starts.</div>
  </section>
- <footer>READYGO v0.4 · Prototype build. Browser speech is a temporary voice placeholder. Camera tracking quality depends on lighting, camera angle, device performance and hand visibility. Not a certified competition measurement system.</footer>
+ <footer>READYGO v0.5 · Prototype build. REF01 GO audio plays when installed; browser speech is the fallback. Camera tracking quality depends on lighting, camera angle, device performance and hand visibility. Not a certified competition measurement system.</footer>
 </div>
 <script>
 (() => {
@@ -96,7 +97,61 @@ const video=$('video'), canvas=$('overlay'), ctx=canvas.getContext('2d');
 let mode='camera', training='progressive', style='strict', stream=null, running=false, calibrated=false;
 let handLandmarker=null, visionReady=false, detectorBusy=false, raf=0, lastWrist=null, baseline=null, center=null;
 let trial=0,total=10,valid=0,falseStarts=0,missed=0,repeated=0,reactionTimes=[],goAt=0,goFired=false,trialActive=false,sequenceTimer=null,noiseNode=null,noiseGain=null;
-let movementThreshold=.075, detectionSource='fallback motion', advanceTimer=null;
+let movementThreshold=.075, detectionSource='fallback motion', advanceTimer=null, missTimer=null, sessionId=0, trialToken=0, completedTrials=0, settledTrialToken=0, lastSeenAt=0;
+const REF01_IDS=[1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20];
+const ref01=new Map();let lastGoId=null, audioCtx=null, activeGoSource=null, goToken=0;
+function updateRefAudioStatus(){
+ $('refStatus').textContent=ref01.size===REF01_IDS.length
+  ?'REF01 ACTIVE · all 19 authentic GO recordings loaded'
+  :ref01.size>0
+   ?`REF01 PARTIAL · ${ref01.size}/19 recordings loaded`
+   :'REF01 UNAVAILABLE · browser voice fallback is active';
+}
+async function preloadRef01(){
+ if(ref01.size===REF01_IDS.length&&audioCtx){await audioCtx.resume();updateRefAudioStatus();return}
+ try{audioCtx=audioCtx||new(window.AudioContext||window.webkitAudioContext)();await audioCtx.resume();
+  await Promise.all(REF01_IDS.map(async id=>{const name=`GO${String(id).padStart(2,'0')}.wav`;try{const res=await fetch(`audio/ref01/${name}`);if(!res.ok)throw Error(res.status);const data=await res.arrayBuffer();ref01.set(id,await audioCtx.decodeAudioData(data))}catch(e){console.warn('REF01 missing:',name,e)}}));
+ }catch(e){console.warn('REF01 audio unavailable',e)}
+ updateRefAudioStatus();
+}
+function playRecordedGo(){
+ if(!running||!audioCtx||audioCtx.state!=='running')return false;
+ const available=REF01_IDS.filter(id=>ref01.has(id)&&id!==lastGoId);
+ if(!available.length)return false;
+ const id=available[Math.floor(Math.random()*available.length)];
+ const src=audioCtx.createBufferSource();src.buffer=ref01.get(id);src.connect(audioCtx.destination);
+ const when=audioCtx.currentTime+.075;
+ try{src.start(when)}catch(e){console.warn('REF01 playback failed',e);return false}
+ lastGoId=id;
+ if('speechSynthesis'in window)speechSynthesis.cancel();
+ activeGoSource=src;
+ const token=++goToken;
+ // The mastered audio manifest reports ~12 ms from file start to the first audible GO.
+ const estimatedAudioOffsetMs=12;
+ const timestamp=audioCtx.getOutputTimestamp?.();
+ const timestampValid=timestamp&&Number.isFinite(timestamp.contextTime)&&Number.isFinite(timestamp.performanceTime)&&timestamp.performanceTime>0;
+ const scheduledPerf=timestampValid
+  ? timestamp.performanceTime+(when-timestamp.contextTime)*1000
+  : performance.now()+(when-audioCtx.currentTime)*1000;
+ goAt=scheduledPerf+estimatedAudioOffsetMs;
+ const revealDelay=Math.max(0,goAt-performance.now());
+ setTimeout(()=>{
+  if(!running||token!==goToken||(!trialActive&&mode==='camera'))return;
+  goFired=true;state(words().go,'go');$('commandText').textContent=words().go;
+  if(mode==='audio')setStatus('GO delivered. Audio-only training does not measure reaction time.');
+ },revealDelay);
+ src.onended=()=>{
+  if(activeGoSource===src)activeGoSource=null;
+  if(running&&token===goToken&&mode==='audio')finishTrial('Trial complete.');
+ };
+ if(mode==='camera'){
+  clearTimeout(missTimer);
+  missTimer=setTimeout(()=>{
+   if(running&&token===goToken&&trialActive){missed++;missedCheck()}
+  },Math.max(0,goAt-performance.now())+2200);
+ }
+ return true;
+}
 const translations={en:{ready:"READY",dont:"DON'T MOVE",elbow:"ELBOW DOWN",wrist:"WRIST",set:"SET",go:"GO"},
 ru:{ready:"ГОТОВ",dont:"НЕ ДВИГАТЬСЯ",elbow:"ЛОКОТЬ ВНИЗ",wrist:"ЗАПЯСТЬЕ",set:"СТАРТ",go:"ПОШЁЛ"},
 tr:{ready:"HAZIR",dont:"HAREKET ETME",elbow:"DİRSEĞİ İNDİR",wrist:"BİLEK",set:"SET",go:"BAŞLA"},
@@ -104,9 +159,36 @@ ro:{ready:"PREGĂTIT",dont:"NU MIȘCA",elbow:"COTUL JOS",wrist:"ÎNCHEIETURĂ",s
 pl:{ready:"GOTOWY",dont:"NIE RUSZAJ SIĘ",elbow:"ŁOKIEĆ W DÓŁ",wrist:"NADGARSTEK",set:"START",go:"GO"}};
 function words(){return translations[$('language').value]||translations.en}
 function setStatus(s){$('status').textContent=s}
-function finishTrial(message){trialActive=false;$('nextBtn').disabled=true;setStatus(message+' Next trial in 2 seconds…');clearTimeout(advanceTimer);advanceTimer=setTimeout(()=>{if(running){if(trial>=total)endSession();else scheduleTrial()}},2000)}
+function finishTrial(message){if(!running||settledTrialToken===trialToken)return;settledTrialToken=trialToken;completedTrials++;trialActive=false;clearTimeout(missTimer);clearTimeout(sequenceTimer);if('speechSynthesis'in window)speechSynthesis.cancel();$('nextBtn').disabled=true;setStatus(message+' Next trial in 2 seconds…');clearTimeout(advanceTimer);advanceTimer=setTimeout(()=>{if(running){if(trial>=total)endSession(true);else scheduleTrial()}},2000)}
 function state(s,kind='ready'){$('stateText').textContent=s;$('stateText').className='state '+kind}
-function setMode(m){if(running)return;mode=m;$('cameraMode').classList.toggle('active',m==='camera');$('audioMode').classList.toggle('active',m==='audio');$('cameraButtons').classList.toggle('hidden',m==='audio');$('audioModeMessage').classList.toggle('hidden',m!=='audio');$('videoWrap').classList.toggle('hidden',m==='audio');$('visualTitle').textContent=m==='camera'?'Camera training · live tracking':'Audio-only training';$('modeNote').textContent=m==='camera'?'Physical movement, false starts and response timing are measured from camera tracking.':'Auditory practice only. No physical reaction-time or false-start scoring.';$('metricOneLabel').textContent=m==='camera'?'Valid starts':'Trials completed';$('metricTwoLabel').textContent=m==='camera'?'False starts':'Commands repeated';$('metricThreeLabel').textContent=m==='camera'?'Avg. response':'Listening focus';$('validCount').textContent='—';$('falseCount').textContent='—';$('avgTime').textContent='—';}
+function setMode(m){
+ if(running)return;
+ if(m==='audio'&&stream){
+  // Audio-only never needs camera access or a live camera stream.
+  stream.getTracks().forEach(track=>track.stop());stream=null;
+  cancelAnimationFrame(raf);raf=0;
+  visionReady=false;handLandmarker=null;lastWrist=null;calibrated=false;center=null;
+  video.pause();video.srcObject=null;video.style.display='none';
+  $('placeholder').classList.remove('hidden');
+  $('cameraBtn').textContent='Enable camera';
+  $('calibrateBtn').disabled=true;$('recenterBtn').disabled=true;
+  $('trackingBadge').textContent='TRACKING · OFF';
+ }
+ mode=m;
+ $('cameraMode').classList.toggle('active',m==='camera');
+ $('audioMode').classList.toggle('active',m==='audio');
+ $('cameraButtons').classList.toggle('hidden',m==='audio');
+ $('audioModeMessage').classList.toggle('hidden',m!=='audio');
+ $('videoWrap').classList.toggle('hidden',m==='audio');
+ $('visualTitle').textContent=m==='camera'?'Camera training · live tracking':'Audio-only training';
+ $('modeNote').textContent=m==='camera'
+  ?'Physical movement, false starts and approximate response timing are measured from hand landmarks.'
+  :'Auditory practice only. The camera is off and no physical response is scored.';
+ $('metricOneLabel').textContent=m==='camera'?'Valid starts':'Trials completed';
+ $('metricTwoLabel').textContent=m==='camera'?'False starts':'Commands repeated';
+ $('metricThreeLabel').textContent=m==='camera'?'Avg. response':'Listening focus';
+ $('validCount').textContent='—';$('falseCount').textContent='—';$('avgTime').textContent='—';
+}
 function setTraining(t){if(running)return;training=t;$('progressive').classList.toggle('active',t==='progressive');$('competition').classList.toggle('active',t==='competition')}
 function setStyle(s){if(running)return;style=s;$('strict').classList.toggle('active',s==='strict');$('aggressive').classList.toggle('active',s==='aggressive')}
 $('cameraMode').onclick=()=>setMode('camera');$('audioMode').onclick=()=>setMode('audio');$('progressive').onclick=()=>setTraining('progressive');$('competition').onclick=()=>setTraining('competition');$('strict').onclick=()=>setStyle('strict');$('aggressive').onclick=()=>setStyle('aggressive');
@@ -116,7 +198,7 @@ async function enableCamera(){
  catch(e){setStatus('Camera unavailable. Allow camera access in your browser, or switch to Audio-only.');}
 }
 $('cameraBtn').onclick=enableCamera;
-$('calibrateBtn').onclick=()=>{if(!lastWrist){setStatus('No hand detected yet. Place your hand clearly in view.');return}center={x:lastWrist.x,y:lastWrist.y};calibrated=true;setStatus('Ready position calibrated. Keep the hand in this position until GO.');state('CENTER SET','ready')};
+$('calibrateBtn').onclick=()=>{if(!visionReady||!lastWrist||performance.now()-lastSeenAt>500){setStatus('Wait for live hand-landmark tracking before calibration.');return}center={x:lastWrist.x,y:lastWrist.y};calibrated=true;setStatus('Ready position calibrated. Keep the hand in this position until GO.');state('CENTER SET','ready')};
 $('recenterBtn').onclick=()=>{calibrated=false;center=null;setStatus('Calibration reset. Calibrate again before starting.');state('CALIBRATE','ready')};
 function resizeCanvas(){canvas.width=video.videoWidth||1280;canvas.height=video.videoHeight||720}
 async function startVision(){
@@ -124,7 +206,13 @@ async function startVision(){
  try{
   const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/+esm');
   const fileset=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
-  handLandmarker=await vision.HandLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath:'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',delegate:'GPU'},runningMode:'VIDEO',numHands:1});
+  const modelAssetPath='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+  try{
+   handLandmarker=await vision.HandLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath,delegate:'GPU'},runningMode:'VIDEO',numHands:1});
+  }catch(gpuError){
+   console.warn('GPU hand tracking unavailable; using CPU',gpuError);
+   handLandmarker=await vision.HandLandmarker.createFromOptions(fileset,{baseOptions:{modelAssetPath,delegate:'CPU'},runningMode:'VIDEO',numHands:1});
+  }
   visionReady=true;detectionSource='hand landmarks';$('trackingBadge').textContent='TRACKING · HAND LANDMARKS';setStatus('Hand tracking active. Calibrate your ready position.');
  }catch(e){visionReady=false;detectionSource='fallback motion';$('trackingBadge').textContent='TRACKING · EXPERIMENTAL';setStatus('Hand-landmark model unavailable. Using experimental frame-motion fallback; accuracy is limited.');}
  cancelAnimationFrame(raf);loop();
@@ -138,19 +226,37 @@ function loop(){
   if(visionReady&&handLandmarker&&!detectorBusy){
    detectorBusy=true;try{const res=handLandmarker.detectForVideo(video,performance.now());if(res.landmarks&&res.landmarks[0]){const lm=res.landmarks[0];wrist={x:lm[0].x,y:lm[0].y};drawHand(lm)}}catch(e){}detectorBusy=false;
   } else if(!visionReady){wrist=fallbackMotion()}
-  if(wrist){lastWrist=wrist;drawTarget(wrist);if(running&&trialActive&&mode==='camera'&&calibrated)checkMovement(wrist)}
+  if(wrist){lastWrist=wrist;lastSeenAt=performance.now();drawTarget(wrist);if(running&&trialActive&&mode==='camera'&&calibrated&&visionReady)checkMovement(wrist)}else if(visionReady&&performance.now()-lastSeenAt>700){lastWrist=null}
  }
  raf=requestAnimationFrame(loop);
 }
 function drawHand(lm){ctx.strokeStyle='#ed2939';ctx.fillStyle='#f2f4f7';ctx.lineWidth=4;const links=[[0,1,2,3,4],[0,5,6,7,8],[5,9,10,11,12],[9,13,14,15,16],[13,17,18,19,20],[0,17]];links.forEach(a=>{ctx.beginPath();a.forEach((id,i)=>{const p=lm[id];if(i===0)ctx.moveTo(p.x*canvas.width,p.y*canvas.height);else ctx.lineTo(p.x*canvas.width,p.y*canvas.height)});ctx.stroke()});lm.forEach(p=>{ctx.beginPath();ctx.arc(p.x*canvas.width,p.y*canvas.height,5,0,Math.PI*2);ctx.fill()})}
 function drawTarget(w){if(!calibrated||!center)return;ctx.strokeStyle='#45d483';ctx.lineWidth=3;ctx.beginPath();ctx.arc(center.x*canvas.width,center.y*canvas.height,Math.min(canvas.width,canvas.height)*movementThreshold,0,Math.PI*2);ctx.stroke();ctx.fillStyle='#45d483';ctx.beginPath();ctx.arc(w.x*canvas.width,w.y*canvas.height,8,0,Math.PI*2);ctx.fill()}
 function fallbackMotion(){try{const c=document.createElement('canvas'),w=80,h=45;c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(video,0,0,w,h);const d=x.getImageData(0,0,w,h).data;let sum=0,n=0;for(let i=0;i<d.length;i+=16){sum+=d[i]+d[i+1]+d[i+2];n++}const avg=sum/(n*3*255);if(prevFrame===null){prevFrame=avg;return null}const delta=Math.abs(avg-prevFrame);prevFrame=avg;if(delta>.012){return {x:.5+Math.min(.2,delta),y:.55}}return lastWrist}catch(e){return null}}
-function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w.y-center.y);if(!goFired&&dist>movementThreshold){falseStarts++;$('falseCount').textContent=falseStarts;state('FALSE START','bad');finishTrial('Movement detected before GO. Reset, settle, and wait for the command.');return}if(goFired&&goAt&&dist>movementThreshold*.75){const ms=Math.max(0,performance.now()-goAt);reactionTimes.push(ms);valid++;$('validCount').textContent=valid;$('avgTime').textContent=Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms';state(Math.round(ms)+' ms','go');finishTrial('Movement detected after GO. Valid start recorded.');goAt=0}}
+function checkMovement(w){if(!center)return;const dist=Math.hypot(w.x-center.x,w.y-center.y);const afterGo=goAt>0&&performance.now()>=goAt;if(!afterGo&&dist>movementThreshold){trialToken++;goToken++;if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}falseStarts++;$('falseCount').textContent=falseStarts;state('FALSE START','bad');finishTrial('Movement detected before GO. Reset, settle, and wait for the command.');return}if(afterGo&&dist>movementThreshold*.75){const ms=Math.max(0,performance.now()-goAt);reactionTimes.push(ms);valid++;$('validCount').textContent=valid;$('avgTime').textContent=Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms';state(Math.round(ms)+' ms','go');finishTrial('Movement detected after GO. Valid start recorded.');goAt=0}}
 function speak(text,isGo=false){
- if(!('speechSynthesis'in window)){setStatus('Speech synthesis is unavailable in this browser.');return}
- const u=new SpeechSynthesisUtterance(text);u.lang=$('language').value==='ru'?'ru-RU':'en-US';u.rate=isGo?1.08:(.88+Math.random()*.24);u.pitch=.9+Math.random()*.2;u.volume=1;
- if(isGo){u.onstart=()=>{goAt=performance.now();goFired=true;state(words().go,'go');$('commandText').textContent=words().go};}
- speechSynthesis.speak(u);
+ if(!('speechSynthesis'in window)){setStatus('Speech synthesis is unavailable.');return Promise.resolve()}
+ return new Promise(resolve=>{
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';
+  u.rate=isGo?1.08:(.88+Math.random()*.24);
+  u.pitch=.9+Math.random()*.2;u.volume=1;
+  let finished=false;
+  const settle=()=>{if(finished)return;finished=true;clearTimeout(watchdog);resolve()};
+  const watchdog=setTimeout(()=>{if(!finished){speechSynthesis.cancel();settle()}},5000);
+  u.onend=()=>{if(isGo&&running&&mode==='audio')finishTrial('Trial complete.');settle()};
+  u.onerror=()=>settle();
+  if(isGo)u.onstart=()=>{
+   if(!running)return;
+   goAt=performance.now();goFired=true;
+   state(words().go,'go');$('commandText').textContent=words().go;
+   if(mode==='camera'){
+    clearTimeout(missTimer);
+    missTimer=setTimeout(()=>{if(running&&trialActive){missed++;missedCheck()}},2200);
+   }
+  };
+  try{speechSynthesis.speak(u)}catch(e){console.warn('TTS unavailable',e);settle()}
+ });
 }
 function noiseStart(){noiseStop();const level=$('noise').value;if(level==='off')return;try{const ac=new(window.AudioContext||window.webkitAudioContext)();const buffer=ac.createBuffer(1,ac.sampleRate*2,ac.sampleRate);const data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1);const src=ac.createBufferSource();src.buffer=buffer;src.loop=true;const filter=ac.createBiquadFilter();filter.type='lowpass';filter.frequency.value=level==='low'?500:1100;const gain=ac.createGain();gain.gain.value=level==='low'?.012:.025;src.connect(filter);filter.connect(gain);gain.connect(ac.destination);src.start();noiseNode={src,ac};}catch(e){}}
 function noiseStop(){if(noiseNode){try{noiseNode.src.stop();noiseNode.ac.close()}catch(e){}noiseNode=null}}
@@ -167,27 +273,29 @@ function commandSequence(){
 }
 function scheduleTrial(){
  if(!running)return;
+ const currentTrial=++trialToken;
+ if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}
  trial++;$('trialBadge').textContent=`TRIAL ${trial} / ${total}`;$('progressBar').style.width=((trial-1)/total*100)+'%';$('nextBtn').disabled=true;
  trialActive=mode==='camera';goFired=false;goAt=0;state('LISTEN','ready');$('commandText').textContent='LISTEN';setStatus('Listen carefully. Do not anticipate the start.');
  const seq=commandSequence();let idx=0;
- function sayNext(){if(!running)return;if(idx<seq.length){const c=seq[idx++];$('commandText').textContent=c;if(c===words().ready)repeated++;speak(c);sequenceTimer=setTimeout(sayNext,650+Math.random()*(style==='aggressive'?1050:1500));}
- else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running)return;$('commandText').textContent=words().go;goFired=true;goAt=performance.now();state(words().go,'go');speak(words().go,true);if(mode==='audio'){setStatus('GO delivered. Audio-only practice: focus on recognition and disciplined response; no movement score.');finishTrial('Trial complete.');}else{setStatus('GO. Move from your calibrated ready position.');setTimeout(()=>{if(running&&trialActive&&goFired){missed++;trialActive=false;missedCheck();}},2200)}} ,delay)}
+ function sayNext(){if(!running||currentTrial!==trialToken)return;if(idx<seq.length){const c=seq[idx++];$('commandText').textContent=c;if(c===words().ready&&idx>1)repeated++;speak(c).then(()=>{if(running&&currentTrial===trialToken)sequenceTimer=setTimeout(sayNext,450+Math.random()*(style==='aggressive'?850:1350))});}
+ else{const delay=training==='competition'?1800+Math.random()*5200:1200+Math.random()*3000;sequenceTimer=setTimeout(()=>{if(!running||currentTrial!==trialToken)return;if(!playRecordedGo())speak(words().go,true);if(mode==='camera'){setStatus('GO pending. Move only when you hear the command.')}} ,delay)}
  }
  sayNext();
 }
 function missedCheck(){state('NO RESPONSE','bad');finishTrial('No movement detected after GO. Review your position and prepare for the next trial.')}
 function startSession(){
- if(running)return;total=Number($('length').value);if(mode==='camera'&&(!stream||!calibrated)){setStatus('Camera Mode requires an enabled camera and a ready-position calibration.');return}
- running=true;trial=valid=falseStarts=missed=repeated=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
- ['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=true);noiseStart();scheduleTrial();
+ if(running)return;total=Number($('length').value);if(mode==='camera'&&(!stream||!calibrated||!visionReady)){setStatus('Camera Mode requires active hand-landmark tracking and ready-position calibration; experimental frame motion is not valid for reaction scoring.');return}
+ running=true;const thisSession=++sessionId;trial=valid=falseStarts=missed=repeated=completedTrials=settledTrialToken=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
+ ['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=true);noiseStart();setStatus('Loading REF01 audio…');preloadRef01().then(()=>{if(running&&thisSession===sessionId)scheduleTrial()});
 }
-function nextTrial(){if(!running)return;if(trial>=total){endSession();return}scheduleTrial()}
-function endSession(){
- running=false;trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width='100%';state('SESSION COMPLETE','ready');$('commandText').textContent='COMPLETE';
- if(mode==='camera'){$('resultsNote').textContent=`${valid} valid starts · ${falseStarts} false starts · ${missed} missed responses. Average measured movement response: ${reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'not available'}. Measurement begins from the browser speech event, not verified acoustic onset.`;setStatus('Session complete. Review the results and refine your discipline.')}
- else{$('validCount').textContent=total;$('falseCount').textContent=repeated;$('avgTime').textContent='—';$('resultsNote').textContent='Audio-only session completed. No physical reaction time or false-start scoring was collected. Repeated setup commands are counted as a measure of sequence complexity.';setStatus('Audio-only session complete. No physical response measurements were recorded.')}
+function nextTrial(){if(!running)return;if(trial>=total){endSession(true);return}scheduleTrial()}
+function endSession(completed=false){
+ running=false;sessionId++;trialToken++;goToken++;clearTimeout(missTimer);if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width=((completed?total:completedTrials)/total*100)+'%';state(completed?'SESSION COMPLETE':'SESSION STOPPED','ready');$('commandText').textContent=completed?'COMPLETE':'STOPPED';
+ if(mode==='camera'){$('resultsNote').textContent=`${valid} valid starts · ${falseStarts} false starts · ${missed} missed responses. Average measured movement response: ${reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'not available'}. Timing uses estimated scheduled playback onset (or speech event fallback), not verified acoustic onset. Camera frame timestamps and device audio latency are not calibrated.`;setStatus('Session complete. Review the results and refine your discipline.')}
+ else{$('validCount').textContent=completedTrials;$('falseCount').textContent=repeated;$('avgTime').textContent='—';$('resultsNote').textContent='Audio-only session completed. No physical reaction time or false-start scoring was collected. Repeated setup commands are counted as a measure of sequence complexity.';setStatus('Audio-only session complete. No physical response measurements were recorded.')}
 }
-$('startBtn').onclick=startSession;$('nextBtn').onclick=nextTrial;$('stopBtn').onclick=endSession;
+$('startBtn').onclick=startSession;$('nextBtn').onclick=nextTrial;$('stopBtn').onclick=()=>endSession(false);
 window.addEventListener('beforeunload',()=>{if(stream)stream.getTracks().forEach(t=>t.stop());noiseStop()});
 })();
 </script>
