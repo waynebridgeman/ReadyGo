@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "readygo-referee-library",
+  "updatedVersion": "0.6.0",
+  "status": "developing",
+  "defaultLocale": "en",
+  "recordingSpecification": "docs/AUDIO_RECORDING_GUIDE.md",
+  "timingDisclaimer": "REF01 per-file 12 ms onset estimate is provisional, not a device-output calibration or certified reaction-time reference.",
+  "commandVocabulary": [
+    {
+      "code": "READY",
+      "category": "setup",
+      "example": "Ready."
+    },
+    {
+      "code": "SET",
+      "category": "setup",
+      "example": "Set."
+    },
+    {
+      "code": "CENTER",
+      "category": "setup",
+      "example": "Center."
+    },
+    {
+      "code": "ELBOW",
+      "category": "adjustment",
+      "example": "Elbow down."
+    },
+    {
+      "code": "WRIST",
+      "category": "adjustment",
+      "example": "Wrist."
+    },
+    {
+      "code": "CLOSE",
+      "category": "adjustment",
+      "example": "Close your hands."
+    },
+    {
+      "code": "DONT_MOVE",
+      "category": "adjustment",
+      "example": "Don't move."
+    },
+    {
+      "code": "SHOULDERS",
+      "category": "adjustment",
+      "example": "Square your shoulders."
+    },
+    {
+      "code": "RESET",
+      "category": "reset",
+      "example": "Reset."
+    },
+    {
+      "code": "BACK",
+      "category": "reset",
+      "example": "Bring it back."
+    },
+    {
+      "code": "STOP",
+      "category": "reset",
+      "example": "Stop."
+    },
+    {
+      "code": "AGAIN",
+      "category": "reset",
+      "example": "Again."
+    },
+    {
+      "code": "GO",
+      "category": "trigger",
+      "example": "GO!"
+    }
+  ],
+  "referees": [
+    {
+      "id": "REF01",
+      "displayName": "Referee 01",
+      "locale": "en",
+      "status": "active",
+      "notes": "First human referee library: 19 GO takes. Setup/reset recordings still needed.",
+      "recordings": [
+        {
+          "id": "REF01_GO_01",
+          "command": "GO",
+          "file": "ref01/GO01.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_02",
+          "command": "GO",
+          "file": "ref01/GO02.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_03",
+          "command": "GO",
+          "file": "ref01/GO03.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_04",
+          "command": "GO",
+          "file": "ref01/GO04.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_05",
+          "command": "GO",
+          "file": "ref01/GO05.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_06",
+          "command": "GO",
+          "file": "ref01/GO06.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_07",
+          "command": "GO",
+          "file": "ref01/GO07.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_09",
+          "command": "GO",
+          "file": "ref01/GO09.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_10",
+          "command": "GO",
+          "file": "ref01/GO10.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_11",
+          "command": "GO",
+          "file": "ref01/GO11.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_12",
+          "command": "GO",
+          "file": "ref01/GO12.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_13",
+          "command": "GO",
+          "file": "ref01/GO13.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_14",
+          "command": "GO",
+          "file": "ref01/GO14.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_15",
+          "command": "GO",
+          "file": "ref01/GO15.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_16",
+          "command": "GO",
+          "file": "ref01/GO16.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_17",
+          "command": "GO",
+          "file": "ref01/GO17.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_18",
+          "command": "GO",
+          "file": "ref01/GO18.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_19",
+          "command": "GO",
+          "file": "ref01/GO19.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        },
+        {
+          "id": "REF01_GO_20",
+          "command": "GO",
+          "file": "ref01/GO20.wav",
+          "onsetMs": 12,
+          "onsetQuality": "estimated",
+          "qaStatus": "provisional",
+          "delivery": "unclassified"
+        }
+      ]
+    }
+  ],
+  "ambiencePacks": []
+}
