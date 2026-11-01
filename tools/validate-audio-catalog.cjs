@@ -64,7 +64,14 @@ for(const ref of catalog.referees){
 }
 for(const e of errors)console.error('FAIL',e);
 assert.equal(errors.length,0,'Catalog contains invalid clips');
-assert.equal(total,19,'REF01 baseline unchanged until additional voices are imported');
-assert.equal(go,19,'All baseline recordings are GO takes');
+const baseline=catalog.referees.find(r=>r.id==='REF01');
+assert(baseline,'REF01 baseline present');
+const expected=[1,2,3,4,5,6,7,9,10,11,12,13,14,15,16,17,18,19,20];
+for(const n of expected){
+ const id='REF01_GO_'+String(n).padStart(2,'0');
+ assert(baseline.recordings.some(t=>t.id===id&&t.command==='GO'),'Baseline clip '+id+' preserved');
+}
+assert(total>=19,'Catalog includes complete baseline');
+assert(go>=19,'Catalog includes 19 GO triggers');
 assert(![...filePaths].some(s=>s.endsWith('/GO08.wav')),'Excluded And GO recording');
 console.log('PASS: catalog '+refereeIds.size+' referee(s), '+total+' valid recorded takes, '+go+' GO triggers; PCM, path and onset checks');
