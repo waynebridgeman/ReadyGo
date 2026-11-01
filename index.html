@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#090b0e">
 <title>ReadyGo — Hear it. Recognize it. Hit it.</title>
 <style>
@@ -39,30 +39,75 @@ button:hover{border-color:#758394}button.primary{background:var(--red);border-co
 .hidden{display:none!important}
 footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-height:1.5}
 @media(max-width:850px){.layout{grid-template-columns:1fr}.wrap{padding:15px 12px 35px}.top{align-items:flex-start}.pill{max-width:135px;text-align:center}}
+
+/* v0.6 mobile usability and competition-stage refinement */
+:root{--surface-outline:#34404e;--camera-glow:#ed293942}
+body{background:radial-gradient(ellipse 75% 42% at 50% 0%,#263240 0%,#0b1017 67%,#070a0e 100%)}
+.wrap{padding-bottom:max(38px,env(safe-area-inset-bottom));}
+.panel{border-color:var(--surface-outline);background:linear-gradient(165deg,#19212b 0%,#111821 55%,#0d1218 100%)}
+.panel h2{color:#e8edf2}
+.videoWrap{background:linear-gradient(135deg,#070b10,#040609);box-shadow:inset 0 0 45px #0008}
+.videoWrap::after{content:"";position:absolute;inset:auto 0 0;height:25%;background:linear-gradient(transparent,#0006);pointer-events:none;z-index:1}
+.cameraHUD,.state{z-index:2}
+.state{padding:5px 13px;max-width:95%;white-space:normal;line-height:1.07}
+.state.go{text-shadow:0 4px 12px #000,0 0 34px #45d48365}
+.state.bad{text-shadow:0 4px 12px #000,0 0 34px #ed29398f}
+.hud{border-color:#ffffff30;font-weight:850;backdrop-filter:blur(8px)}
+button,select{min-height:44px;touch-action:manipulation}
+button:focus-visible,select:focus-visible{outline:2px solid #f5e3e7;outline-offset:3px}
+button.primary{font-size:14px;letter-spacing:.07em;box-shadow:0 3px 0 #81121c}
+#startBtn{min-height:56px;letter-spacing:.12em;font-size:15px}
+#stopBtn{border-color:#c24b58}
+#refStatus{border-left:3px solid #45d483;padding:8px 10px;background:#111b1b;border-radius:4px}
+.progress{height:7px}
+.stat{background:#0a1119;min-height:78px}
+.stat strong{font-weight:850}
+body.session-active .videoWrap{box-shadow:0 0 0 1px #ed293960,0 0 36px #ed29391a,inset 0 0 45px #0009}
+@media(max-width:850px){
+ .wrap{padding:calc(12px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) calc(35px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+ .top{margin-bottom:12px}.brand{font-size:25px}
+ h1{font-size:clamp(30px,7vw,37px);margin:10px 0}
+ .sub{font-size:14px;margin-bottom:15px}
+ .panel{padding:14px;border-radius:14px}
+ .layout{gap:12px}
+ .videoWrap{aspect-ratio:4/3;border-radius:12px}
+ .state{font-size:clamp(32px,9vw,52px)}
+ .videoFoot{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ #cameraBtn{grid-column:1 / -1}
+ .videoFoot button{min-height:48px;font-size:13px}
+ .hud{font-size:9px;letter-spacing:.06em;padding:7px}
+ .field label{font-size:11px}
+ .note,.statusline{font-size:12px;line-height:1.5}
+ .segment button{font-size:13px}
+ .stats{gap:6px}.stat{padding:10px 7px}.stat strong{font-size:clamp(18px,5vw,25px)}.stat small{font-size:9px}
+ .actions{gap:10px}
+ .pill{font-size:10px;padding:6px 9px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:0s!important;animation-duration:0s!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
- <header class="top"><div><div class="brand">READY<span>GO</span></div><div class="tag">HEAR IT. RECOGNIZE IT. HIT IT.</div></div><div class="pill">TRAINING BUILD · v0.5</div></header>
+ <header class="top"><div><div class="brand">READY<span>GO</span></div><div class="tag">HEAR IT. RECOGNIZE IT. HIT IT.</div></div><div class="pill">TRAINING BUILD · v0.6 BETA</div></header>
  <h1>Train the <em>recognition.</em><br>Own the start.</h1>
  <p class="sub">A referee-start training environment for armwrestlers. Learn to listen, stay disciplined through setup changes, and respond when the GO actually comes.</p>
  <div class="layout">
   <section class="panel">
-   <h2 id="visualTitle">Camera training · live tracking</h2>
+   <h2 id="visualTitle">Live arena · camera tracking</h2>
    <div class="videoWrap" id="videoWrap">
     <video id="video" playsinline muted></video><canvas id="overlay"></canvas>
     <div class="placeholder" id="placeholder"><strong>CAMERA READY</strong>Enable your camera to calibrate your ready position and train movement response.</div>
     <div class="cameraHUD"><span class="hud" id="trackingBadge">TRACKING · OFF</span><span class="hud" id="trialBadge">TRIAL 0 / 10</span></div>
-    <div class="state ready" id="stateText">READY?</div>
+    <div class="state ready" id="stateText" aria-live="polite">READY?</div>
    </div>
    <div class="videoFoot" id="cameraButtons">
     <button id="cameraBtn" class="primary">Enable camera</button><button id="calibrateBtn" disabled>Calibrate ready position</button><button id="recenterBtn" disabled>Reset calibration</button>
    </div>
    <div class="videoFoot hidden" id="audioModeMessage"><span class="note">AUDIO-ONLY SESSION · Camera and movement scoring are off. Focus on command recognition, patience, and disciplined response.</span></div>
-   <div class="note" id="cameraNote">Camera mode uses hand landmarks when available. Keep your hand visible and still in the ready position during calibration.</div>
+   <div class="note" id="cameraNote">Place your iPhone on a stable stand. Keep your hand and wrist clearly in frame, hold your starting position, then calibrate.</div>
   </section>
   <aside class="panel">
-   <h2>Session setup</h2>
+   <h2>Build your session</h2>
    <div class="controls">
     <div class="field"><label>Measurement mode</label><div class="segment"><button id="cameraMode" class="active">Camera mode</button><button id="audioMode">Audio-only</button></div><div class="note" id="modeNote">Physical movement, false starts and response timing are measured from camera tracking.</div></div>
     <div class="field"><label>Training mode</label><div class="segment"><button id="progressive" class="active">Progressive training</button><button id="competition">Competition simulation</button></div></div>
@@ -73,14 +118,14 @@ footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-heigh
     <div class="note" id="refStatus" role="status" aria-live="polite">REF01 · 19 real GO commands · loads when the session starts</div>
     <div class="divider"></div>
     <div class="commandBox"><small>REFEREE COMMAND</small><strong id="commandText">WAITING</strong></div>
-    <div class="actions"><button id="startBtn" class="primary wide">Start session</button><button id="nextBtn" disabled class="hidden">Next trial</button><button id="stopBtn" disabled>End session</button></div>
+    <div class="actions"><button id="startBtn" class="primary wide">START SESSION</button><button id="nextBtn" disabled class="hidden">Next trial</button><button id="stopBtn" disabled>End session</button></div>
     <div class="progress"><div id="progressBar"></div></div>
-    <div class="statusline" id="status">Select a mode, enable the camera if using Camera Mode, then start.</div>
+    <div class="statusline" id="status" role="status" aria-live="polite">Select a mode, enable the camera if using Camera Mode, then start.</div>
    </div>
   </aside>
  </div>
  <section class="panel" style="margin-top:16px">
-  <h2>Session performance</h2>
+  <h2>Session performance · experimental timing</h2>
   <div class="stats">
    <div class="stat"><small id="metricOneLabel">Valid starts</small><strong id="validCount">—</strong></div>
    <div class="stat"><small id="metricTwoLabel">False starts</small><strong id="falseCount">—</strong></div>
@@ -88,7 +133,8 @@ footer{color:#66717d;font-size:10px;text-align:center;margin-top:20px;line-heigh
   </div>
   <div class="note" id="resultsNote" style="margin-top:10px">Camera mode reports movement-based measurements. Audio-only sessions focus on listening discipline and do not calculate physical reaction time or false starts.</div>
  </section>
- <footer>READYGO v0.5 · Prototype build. REF01 GO audio plays when installed; browser speech is the fallback. Camera tracking quality depends on lighting, camera angle, device performance and hand visibility. Not a certified competition measurement system.</footer>
+ <footer><a href="recorder/" style="color:#e0e8ef;font-size:12px;font-weight:750;text-decoration:underline;text-underline-offset:3px">Contribute a real referee voice · Recording Studio</a>
+<p style="margin:9px 0">READYGO v0.6 BETA · Prototype build. REF01 GO audio plays when installed; browser speech is the fallback. Camera tracking quality depends on lighting, camera angle, device performance and hand visibility. Not a certified competition measurement system.</p></footer>
 </div>
 <script>
 (() => {
@@ -286,12 +332,12 @@ function scheduleTrial(){
 function missedCheck(){state('NO RESPONSE','bad');finishTrial('No movement detected after GO. Review your position and prepare for the next trial.')}
 function startSession(){
  if(running)return;total=Number($('length').value);if(mode==='camera'&&(!stream||!calibrated||!visionReady)){setStatus('Camera Mode requires active hand-landmark tracking and ready-position calibration; experimental frame motion is not valid for reaction scoring.');return}
- running=true;const thisSession=++sessionId;trial=valid=falseStarts=missed=repeated=completedTrials=settledTrialToken=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
+ running=true;document.body.classList.add('session-active');const thisSession=++sessionId;trial=valid=falseStarts=missed=repeated=completedTrials=settledTrialToken=0;reactionTimes=[];$('validCount').textContent=mode==='camera'?'0':'0';$('falseCount').textContent=mode==='camera'?'0':'—';$('avgTime').textContent='—';$('startBtn').disabled=true;$('stopBtn').disabled=false;$('nextBtn').disabled=true;
  ['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=true);noiseStart();setStatus('Loading REF01 audio…');preloadRef01().then(()=>{if(running&&thisSession===sessionId)scheduleTrial()});
 }
 function nextTrial(){if(!running)return;if(trial>=total){endSession(true);return}scheduleTrial()}
 function endSession(completed=false){
- running=false;sessionId++;trialToken++;goToken++;clearTimeout(missTimer);if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width=((completed?total:completedTrials)/total*100)+'%';state(completed?'SESSION COMPLETE':'SESSION STOPPED','ready');$('commandText').textContent=completed?'COMPLETE':'STOPPED';
+ running=false;document.body.classList.remove('session-active');sessionId++;trialToken++;goToken++;clearTimeout(missTimer);if(activeGoSource){try{activeGoSource.stop()}catch(e){}activeGoSource=null}trialActive=false;clearTimeout(sequenceTimer);clearTimeout(advanceTimer);noiseStop();if('speechSynthesis'in window)speechSynthesis.cancel();$('startBtn').disabled=false;$('stopBtn').disabled=true;$('nextBtn').disabled=true;['cameraMode','audioMode','progressive','competition','strict','aggressive'].forEach(id=>$(id).disabled=false);$('progressBar').style.width=((completed?total:completedTrials)/total*100)+'%';state(completed?'SESSION COMPLETE':'SESSION STOPPED','ready');$('commandText').textContent=completed?'COMPLETE':'STOPPED';
  if(mode==='camera'){$('resultsNote').textContent=`${valid} valid starts · ${falseStarts} false starts · ${missed} missed responses. Average measured movement response: ${reactionTimes.length?Math.round(reactionTimes.reduce((a,b)=>a+b,0)/reactionTimes.length)+' ms':'not available'}. Timing uses estimated scheduled playback onset (or speech event fallback), not verified acoustic onset. Camera frame timestamps and device audio latency are not calibrated.`;setStatus('Session complete. Review the results and refine your discipline.')}
  else{$('validCount').textContent=completedTrials;$('falseCount').textContent=repeated;$('avgTime').textContent='—';$('resultsNote').textContent='Audio-only session completed. No physical reaction time or false-start scoring was collected. Repeated setup commands are counted as a measure of sequence complexity.';setStatus('Audio-only session complete. No physical response measurements were recorded.')}
 }
