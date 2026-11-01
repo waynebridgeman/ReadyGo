@@ -13,3 +13,4 @@ jobs:
         with:
           node-version: '22'
       - run: node tests/smoke.cjs
+      - run: node tests/session.cjs
