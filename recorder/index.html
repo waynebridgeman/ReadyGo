@@ -87,7 +87,7 @@ const phrases=[
 const phraseMap=new Map(phrases.map(([id,text,hint])=>[id,{text,hint}]));
 for(const [code,text] of phrases){const op=document.createElement('option');op.value=code;op.textContent=code+' — '+text;$('phrase').append(op)}
 const clips=[],taken=new Map(),urls=[];
-let recorder=null,stream=null,parts=[],active=null,startedAt=0,clock=0;
+let recorder=null,stream=null,parts=[],active=null,startedAt=0,clock=0,exported=false;
 function status(message){$('status').textContent=message}
 function two(n){return String(n).padStart(2,'0')}
 function currentKey(){return $('ref').value+'_'+$('phrase').value}
@@ -134,7 +134,7 @@ $('start').onclick=async()=>{
   recorder.onstop=()=>{
    const blob=new Blob(parts,{type:active.mime}),record={...active,blob,bytes:blob.size,durationMs:Date.now()-startedAt,createdAt:new Date().toISOString()};
    if(blob.size<500){status('This take appears empty. Please try again.')}
-   else{clips.push(record);taken.set(ref+'_'+command,next);drawClips();status('Saved '+record.filename+'. Review playback before exporting.')}
+   else{clips.push(record);exported=false;taken.set(ref+'_'+command,next);drawClips();status('Saved '+record.filename+'. Review playback before exporting.')}
    stream?.getTracks().forEach(t=>t.stop());stream=null;recorder=null;active=null;
    setRecording(false);
   };
@@ -178,11 +178,11 @@ async function zipEntries(entries){
  for(const item of entries){
   const name=utf8(item.name),bytes=item.bytes,crc=crc32(bytes);
   const local=new Uint8Array(30+name.length),l=new DataView(local.buffer);
-  w32(l,0,0x04034b50);w16(l,4,20);w16(l,6,0x0800);w16(l,8,0);w16(l,10,0);w16(l,12,0);
+  w32(l,0,0x04034b50);w16(l,4,20);w16(l,6,0x0800);w16(l,8,0);w16(l,10,0);w16(l,12,0x21);
   w32(l,14,crc);w32(l,18,bytes.length);w32(l,22,bytes.length);w16(l,26,name.length);w16(l,28,0);local.set(name,30);
   const center=new Uint8Array(46+name.length),c=new DataView(center.buffer);
   w32(c,0,0x02014b50);w16(c,4,20);w16(c,6,20);w16(c,8,0x0800);w16(c,10,0);
-  w16(c,12,0);w16(c,14,0);w32(c,16,crc);w32(c,20,bytes.length);w32(c,24,bytes.length);
+  w16(c,12,0);w16(c,14,0x21);w32(c,16,crc);w32(c,20,bytes.length);w32(c,24,bytes.length);
   w16(c,28,name.length);w16(c,30,0);w16(c,32,0);w16(c,34,0);w16(c,36,0);w32(c,38,0);w32(c,42,offset);
   center.set(name,46);central.push(center);chunks.push(local,bytes);offset+=local.length+bytes.length;
  }
@@ -199,13 +199,14 @@ $('downloadAll').onclick=async()=>{
   const manifest={schemaVersion:1,source:'ReadyGo browser recording studio',createdAt:new Date().toISOString(),notice:'Original captures; untrimmed; audio has not passed production QA.',clips:clips.map(({ref,command,take,filename,mime,bytes,durationMs,createdAt})=>({ref,command,take,filename,mime,bytes,durationMs,createdAt}))};
   entries.push({name:'batch_manifest.json',bytes:utf8(JSON.stringify(manifest,null,2))});
   const archive=await zipEntries(entries);
-  download(archive,'ReadyGo_referee_batch_'+new Date().toISOString().slice(0,10)+'.zip');
+  download(archive,'ReadyGo_referee_batch_'+new Date().toISOString().slice(0,10)+'.zip');exported=true;
   status('Batch ZIP downloaded. Keep a backup before leaving this page.');
  }catch(e){status('Could not package batch: '+(e?.message||e))}
  finally{$('downloadAll').disabled=false}
 };
+window.addEventListener('pagehide',()=>urls.forEach(u=>URL.revokeObjectURL(u)));
 window.addEventListener('beforeunload',e=>{
- if(recorder?.state==='recording'||clips.length){e.preventDefault();e.returnValue='';}
+ if(recorder?.state==='recording'||(clips.length&&!exported)){e.preventDefault();e.returnValue='';}
 });
 })();
 </script>
