@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b0e">
+<title>ReadyGo — Referee Recording Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#090b0e;--panel:#151c24;--panel2:#1d2731;--edge:#33404d;--ink:#f4f6f8;--muted:#a6b4c3;--red:#ef3848;--green:#60da99;--amber:#ffd27b}
+*{box-sizing:border-box}html{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{margin:0;background:radial-gradient(ellipse at top,#26313e 0%,#090b0e 60%);color:var(--ink)}
+main{width:min(900px,100%);margin:auto;padding:calc(28px + env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))}
+header{display:flex;justify-content:space-between;gap:12px;align-items:center}.logo{font-size:22px;font-weight:950;letter-spacing:.09em}.logo b{color:var(--red)}
+.kicker{font-size:12px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
+h1{font-size:clamp(30px,7vw,50px);line-height:1.06;letter-spacing:-.04em;margin:25px 0 12px}h1 em{font-style:normal;color:var(--red)}
+.lead{color:var(--muted);line-height:1.6;max-width:720px;margin:0 0 24px}
+.card{background:linear-gradient(145deg,#19222d,#10161d);border:1px solid var(--edge);border-radius:18px;padding:clamp(16px,3vw,26px);margin-bottom:16px;box-shadow:0 14px 30px #0003}
+.line{display:flex;align-items:center;justify-content:space-between;gap:12px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{display:block;font-size:12px;letter-spacing:.06em;color:var(--muted);margin:0 0 8px}select,button,input{font:inherit}select{width:100%;min-height:48px;background:#0d1319;border:1px solid #3c4b5b;border-radius:10px;color:var(--ink);padding:12px}
+.prompt{margin:20px 0 8px;padding:24px;border:1px solid #304050;border-radius:14px;background:#080e14;text-align:center}
+.prompt small{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.2em}
+.prompt strong{display:block;font-size:clamp(37px,9vw,70px);margin:8px 0;font-weight:900;line-height:1.13;letter-spacing:-.04em}
+.prompt span{color:var(--muted);font-size:13px}
+button{min-height:50px;border-radius:11px;background:#263340;color:var(--ink);border:1px solid #536375;padding:12px 18px;font-weight:750;cursor:pointer}
+button:hover{border-color:#8b9eaf}button:disabled{opacity:.42;cursor:not-allowed}
+button.primary{background:var(--red);border-color:var(--red);color:white}
+button.stop{background:#412027;border-color:#df5363}
+button.download{background:#183928;border-color:#388c5e}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.recordIndicator{display:inline-flex;align-items:center;gap:9px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dot{width:10px;height:10px;display:inline-block;border-radius:50%;background:#637283}
+.recording .dot{background:var(--red);box-shadow:0 0 0 5px #ef384829;animation:pulse .9s infinite alternate}
+@keyframes pulse{to{opacity:.35}}.status{font-size:13px;color:var(--muted);margin-top:12px;min-height:19px}
+.check{display:flex;gap:10px;align-items:flex-start;line-height:1.4;color:#d8e0e8;font-size:14px;margin-top:12px}
+.check input{margin:2px 0 0;width:20px;height:20px;accent-color:var(--red)}
+.clip{display:grid;grid-template-columns:minmax(105px,1fr) minmax(120px,2fr) auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #ffffff14}
+.clip:last-child{border:0}.clip audio{width:100%;height:40px}.clip .id{font-weight:800}.clip small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+.clip button{font-size:12px;min-height:42px}.empty{color:var(--muted);padding:17px 0}
+.meta{color:var(--muted);font-size:12px;line-height:1.6;margin-top:12px}a{color:#c5d8f0;text-decoration-thickness:1px;text-underline-offset:3px}
+h2{font-size:16px;margin:0 0 8px}footer{font-size:12px;color:var(--muted);line-height:1.6;margin-top:24px}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.clip{grid-template-columns:1fr auto}.clip audio{grid-column:1/-1;grid-row:2}.actions{grid-template-columns:1fr 1fr}}
+@media(prefers-reduced-motion:reduce){.recording .dot{animation:none}}
+</style>
+</head>
+<body><main>
+<header><div class="logo">READY<b>GO</b></div><div class="kicker">Referee Studio · v0.6</div></header>
+<h1>Record the <em>real referee.</em></h1>
+<p class="lead">Build the authentic referee voice library for ReadyGo. Record each command separately, review it, then download your entire batch as one ZIP. Nothing uploads from this page—audio stays in your browser until you export it.</p>
+
+<section class="card" aria-label="Capture setup">
+<h2>1. Prepare your takes</h2>
+<div class="grid">
+<div><label for="ref">Referee voice</label><select id="ref"><option value="REF02">REF02 — New referee</option><option value="REF03">REF03 — New referee</option><option value="REF01">REF01 — Existing voice (setup commands)</option><option value="REF04">REF04 — Additional referee</option></select></div>
+<div><label for="phrase">Single referee command</label><select id="phrase"></select></div>
+</div>
+<div class="prompt"><small>Speak only this command</small><strong id="promptText">GO!</strong><span id="promptHint">Capture a natural referee start. Vary tone and intensity across takes.</span></div>
+<div class="check"><input type="checkbox" id="consent"><label for="consent" style="color:inherit;font-size:14px;letter-spacing:0;margin:0">I have the speaker's permission to record this voice and share the exported takes with the ReadyGo project.</label></div>
+<div class="actions"><button id="start" class="primary">● Start recording</button><button id="stop" class="stop" disabled>■ Stop recording</button></div>
+<div class="line"><span class="recordIndicator" id="indicator"><span class="dot"></span><span id="timer">00:00</span></span><span id="count" style="color:var(--muted);font-size:13px">0 saved takes</span></div>
+<p id="status" class="status" role="status" aria-live="polite">Choose a command, then record. Use Safari over HTTPS on iPhone.</p>
+</section>
+
+<section class="card">
+<div class="line"><h2>2. Review and export</h2><button id="downloadAll" class="download" disabled>Download batch ZIP</button></div>
+<div id="clips" aria-label="Recorded takes"><div class="empty">No recordings yet.</div></div>
+<div class="meta">Use headphones to check every take for the initial consonant, plosives, clipping, room noise and unintelligible words. The exported archive contains originals plus a JSON take manifest; production trimming happens separately.</div>
+</section>
+<footer>Capture guidance: quiet indoor room, stable microphone distance, permission to use voice, and varied real delivery. Avoid "And GO!" inside a GO-only take. Recording format is chosen by the iPhone/browser (typically M4A or WebM). Source audio is never uploaded by this tool. <a href="../docs/AUDIO_RECORDING_GUIDE.md">Recording guide</a>.</footer>
+</main>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const phrases=[
+['GO','GO!','Only GO, no preceding words; try different natural intensity.'],
+['READY','Ready.','Typical setup voice; pause naturally after the command.'],
+['SET','Set.','Short final setup cue, separate from GO.'],
+['CENTER','Center.','Correct the hands back to center.'],
+['ELBOW','Elbow down.','Make a clear technical correction.'],
+['WRIST','Wrist.','Issue a wrist correction.'],
+['CLOSE','Close your hands.','Natural referee instruction.'],
+['DONT_MOVE',"Don't move.",'Firm discipline without a GO cue.'],
+['SHOULDERS','Square your shoulders.','Natural adjustment instruction.'],
+['RESET','Reset.','Interrupt the setup and return to center.'],
+['BACK','Bring it back.','Natural corrective reset.'],
+['STOP','Stop.','Clear interruption.'],
+['AGAIN','Again.','Repeat the setup.']
+];
+const phraseMap=new Map(phrases.map(([id,text,hint])=>[id,{text,hint}]));
+for(const [code,text] of phrases){const op=document.createElement('option');op.value=code;op.textContent=code+' — '+text;$('phrase').append(op)}
+const clips=[],taken=new Map(),urls=[];
+let recorder=null,stream=null,parts=[],active=null,startedAt=0,clock=0;
+function status(message){$('status').textContent=message}
+function two(n){return String(n).padStart(2,'0')}
+function currentKey(){return $('ref').value+'_'+$('phrase').value}
+function updatePrompt(){
+ const p=phraseMap.get($('phrase').value);
+ $('promptText').textContent=p?.text??'GO!';
+ $('promptHint').textContent=p?.hint??'Speak only this command.';
+}
+$('phrase').addEventListener('change',updatePrompt);
+$('ref').addEventListener('change',updatePrompt);
+updatePrompt();
+function preferredMime(){
+ if(!window.MediaRecorder)return '';
+ for(const type of ['audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm;codecs=opus','audio/webm']){
+  try{if(MediaRecorder.isTypeSupported(type))return type}catch(e){}
+ }
+ return '';
+}
+function saveUrl(blob){const u=URL.createObjectURL(blob);urls.push(u);return u}
+function download(blob,filename){
+ const url=saveUrl(blob),a=document.createElement('a');
+ a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();
+}
+function setRecording(on){
+ $('start').disabled=on;$('stop').disabled=!on;$('phrase').disabled=on;$('ref').disabled=on;
+ $('indicator').classList.toggle('recording',on);
+ if(on){startedAt=Date.now();clock=setInterval(()=>{$('timer').textContent=two(Math.floor((Date.now()-startedAt)/60000))+':'+two(Math.floor((Date.now()-startedAt)/1000)%60)},250)}
+ else{clearInterval(clock);$('timer').textContent='00:00'}
+}
+$('start').onclick=async()=>{
+ if(!$('consent').checked){status('Please confirm recording permission before starting.');return}
+ if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){status('Recording is not supported here. Use iPhone Voice Memos and export original files instead.');return}
+ try{
+  const ref=$('ref').value,command=$('phrase').value,mime=preferredMime();
+  const key=currentKey(),next=(taken.get(key)||0)+1;
+  $('start').disabled=true;status('Requesting microphone access…');
+  stream=await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+  recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
+  const realMime=recorder.mimeType||mime||'audio/webm';
+  const ext=realMime.includes('mp4')?'m4a':realMime.includes('webm')?'webm':'ogg';
+  active={ref,command,take:next,filename:ref+'_'+command+'_take'+two(next)+'.'+ext,mime:realMime};
+  parts=[];
+  recorder.ondataavailable=e=>{if(e.data?.size)parts.push(e.data)};
+  recorder.onstop=()=>{
+   const blob=new Blob(parts,{type:active.mime}),record={...active,blob,bytes:blob.size,durationMs:Date.now()-startedAt,createdAt:new Date().toISOString()};
+   if(blob.size<500){status('This take appears empty. Please try again.')}
+   else{clips.push(record);taken.set(ref+'_'+command,next);drawClips();status('Saved '+record.filename+'. Review playback before exporting.')}
+   stream?.getTracks().forEach(t=>t.stop());stream=null;recorder=null;active=null;
+   setRecording(false);
+  };
+  recorder.onerror=()=>status('Microphone recording error. Try again.');
+  recorder.start(250);setRecording(true);status('Recording… Speak the command naturally, then stop.');
+ }catch(e){status('Could not open microphone: '+(e?.message||e));stream?.getTracks().forEach(t=>t.stop());stream=null;recorder=null;setRecording(false)}
+};
+$('stop').onclick=()=>{
+ if(!recorder||recorder.state!=='recording')return;
+ $('stop').disabled=true;status('Processing take…');
+ recorder.stop();
+};
+function drawClips(){
+ $('count').textContent=clips.length+' saved take'+(clips.length===1?'':'s');
+ $('downloadAll').disabled=!clips.length;
+ const holder=$('clips');holder.replaceChildren();
+ if(!clips.length){holder.innerHTML='<div class="empty">No recordings yet.</div>';return}
+ for(const c of clips){
+  const row=document.createElement('div');row.className='clip';
+  const text=document.createElement('div');text.className='id';text.textContent=c.ref+' · '+c.command;
+  const small=document.createElement('small');small.textContent='Take '+two(c.take)+' · '+(c.durationMs/1000).toFixed(1)+'s';text.append(small);
+  const audio=document.createElement('audio');audio.controls=true;audio.preload='none';audio.src=saveUrl(c.blob);
+  const action=document.createElement('button');action.textContent='Download';action.onclick=()=>download(c.blob,c.filename);
+  row.append(text,audio,action);holder.prepend(row);
+ }
+}
+function crc32(data){
+ let crc=0xffffffff;
+ for(const byte of data){
+  crc^=byte;
+  for(let i=0;i<8;i++)crc=(crc>>>1) ^ ((crc&1)?0xedb88320:0);
+ }
+ return (crc^0xffffffff)>>>0;
+}
+function utf8(s){return new TextEncoder().encode(s)}
+function w16(v,o,n){v.setUint16(o,n,true)}
+function w32(v,o,n){v.setUint32(o,n>>>0,true)}
+function join(parts){const out=new Uint8Array(parts.reduce((a,b)=>a+b.length,0));let n=0;for(const p of parts){out.set(p,n);n+=p.length}return out}
+async function zipEntries(entries){
+ const chunks=[],central=[];let offset=0;
+ for(const item of entries){
+  const name=utf8(item.name),bytes=item.bytes,crc=crc32(bytes);
+  const local=new Uint8Array(30+name.length),l=new DataView(local.buffer);
+  w32(l,0,0x04034b50);w16(l,4,20);w16(l,6,0x0800);w16(l,8,0);w16(l,10,0);w16(l,12,0);
+  w32(l,14,crc);w32(l,18,bytes.length);w32(l,22,bytes.length);w16(l,26,name.length);w16(l,28,0);local.set(name,30);
+  const center=new Uint8Array(46+name.length),c=new DataView(center.buffer);
+  w32(c,0,0x02014b50);w16(c,4,20);w16(c,6,20);w16(c,8,0x0800);w16(c,10,0);
+  w16(c,12,0);w16(c,14,0);w32(c,16,crc);w32(c,20,bytes.length);w32(c,24,bytes.length);
+  w16(c,28,name.length);w16(c,30,0);w16(c,32,0);w16(c,34,0);w16(c,36,0);w32(c,38,0);w32(c,42,offset);
+  center.set(name,46);central.push(center);chunks.push(local,bytes);offset+=local.length+bytes.length;
+ }
+ const directory=join(central),end=new Uint8Array(22),e=new DataView(end.buffer);
+ w32(e,0,0x06054b50);w16(e,4,0);w16(e,6,0);w16(e,8,entries.length);w16(e,10,entries.length);w32(e,12,directory.length);w32(e,16,offset);w16(e,20,0);
+ return new Blob([...chunks,directory,end],{type:'application/zip'});
+}
+$('downloadAll').onclick=async()=>{
+ if(!clips.length)return;
+ $('downloadAll').disabled=true;status('Packaging '+clips.length+' original recording(s)…');
+ try{
+  const entries=[];
+  for(const c of clips)entries.push({name:c.filename,bytes:new Uint8Array(await c.blob.arrayBuffer())});
+  const manifest={schemaVersion:1,source:'ReadyGo browser recording studio',createdAt:new Date().toISOString(),notice:'Original captures; untrimmed; audio has not passed production QA.',clips:clips.map(({ref,command,take,filename,mime,bytes,durationMs,createdAt})=>({ref,command,take,filename,mime,bytes,durationMs,createdAt}))};
+  entries.push({name:'batch_manifest.json',bytes:utf8(JSON.stringify(manifest,null,2))});
+  const archive=await zipEntries(entries);
+  download(archive,'ReadyGo_referee_batch_'+new Date().toISOString().slice(0,10)+'.zip');
+  status('Batch ZIP downloaded. Keep a backup before leaving this page.');
+ }catch(e){status('Could not package batch: '+(e?.message||e))}
+ finally{$('downloadAll').disabled=false}
+};
+window.addEventListener('beforeunload',e=>{
+ if(recorder?.state==='recording'||clips.length){e.preventDefault();e.returnValue='';}
+});
+})();
+</script>
+</body></html>
