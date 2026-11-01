@@ -13,6 +13,8 @@ jobs:
           node-version: '22'
       - name: Static assets and JavaScript syntax
         run: node tests/smoke.cjs
+      - name: Verify versioned referee audio catalog
+        run: node tools/validate-audio-catalog.cjs
       - name: Session lifecycle simulation
         run: node tests/session.cjs
       - name: Install browser automation
