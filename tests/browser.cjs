@@ -89,7 +89,28 @@ export const HandLandmarker={createFromOptions:async()=>({
   await page.locator('#audioMode').click();
   assert.equal(await page.locator('#cameraBtn').isVisible(),false,'audio-only hides camera controls');
   assert.deepEqual(errors,[],'no page script errors');
-  console.log('PASS: Chrome REF01 playback, automatic trials, stop, simulated camera false/valid starts, and audio-only camera shutdown');
+  // Contributor recording studio: microphone capture, review, ZIP export and local privacy.
+  const recorderContext=await browser.newContext({permissions:['microphone'],acceptDownloads:true});
+  const studio=await recorderContext.newPage();
+  const studioErrors=[];
+  studio.on('pageerror',e=>studioErrors.push(e.message));
+  await studio.goto('http://127.0.0.1:'+server.address().port+'/recorder/',{waitUntil:'load'});
+  assert.equal(await studio.locator('#promptText').textContent(),'GO!','default recording prompt');
+  await studio.locator('#consent').check();
+  await studio.locator('#start').click();
+  await studio.waitForFunction(()=>!document.querySelector('#stop').disabled,null,{timeout:10000});
+  await studio.waitForTimeout(650);
+  await studio.locator('#stop').click();
+  await studio.waitForFunction(()=>document.querySelector('#count').textContent.includes('1 saved take'),null,{timeout:10000});
+  assert.equal(await studio.locator('#clips audio').count(),1,'reviewable audio is captured');
+  const [saved]=await Promise.all([studio.waitForEvent('download',{timeout:10000}),studio.locator('#downloadAll').click()]);
+  const zipped=fs.readFileSync(await saved.path());
+  assert.equal(zipped.toString('ascii',0,4),'PK\\x03\\x04'.replace(/\\\\x03/g,'\\x03').replace(/\\\\x04/g,'\\x04'),'ZIP signature');
+  assert(zipped.includes(Buffer.from('REF02_GO_take01.')),'recorded take in exported ZIP');
+  assert(zipped.includes(Buffer.from('batch_manifest.json')),'batch metadata in exported ZIP');
+  assert.deepEqual(studioErrors,[],'recorder browser has no script errors');
+  await recorderContext.close();
+  console.log('PASS: Chrome REF01 playback, camera simulation and local microphone recording studio ZIP export');
  }finally{
   if(browser)await browser.close();
   await new Promise(resolve=>server.close(resolve));
