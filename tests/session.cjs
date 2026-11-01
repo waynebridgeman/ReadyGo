@@ -7,7 +7,7 @@ const assert=require('node:assert/strict');
 const html=fs.readFileSync('index.html','utf8');
 const js=html.match(/<script>([\s\S]*?)<\/script>/)[1];
 
-async function simulate({noAudio=false,stopEarly=false}={}){
+async function simulate({noAudio=false,stopEarly=false,trials=10}={}){
  let now=0,nextId=0;
  const timers=new Map(), fetched=[], sounds=[], errors=[];
  const queue=(fn,ms=0)=>{const id=++nextId;timers.set(id,{at:now+Math.max(0,Number(ms)||0),fn});return id};
@@ -76,7 +76,7 @@ async function simulate({noAudio=false,stopEarly=false}={}){
  };
  vm.runInNewContext(js,sandbox,{filename:'index.html'});
  el('audioMode').onclick();
- el('length').value='10';
+ el('length').value=String(trials);
  el('startBtn').onclick();
  await flush();
  if(stopEarly){
@@ -88,19 +88,20 @@ async function simulate({noAudio=false,stopEarly=false}={}){
   assert.equal(sounds.length,0,'no GO after stop');
   return;
  }
- for(let i=0;i<1600&&el('startBtn').disabled;i++)await step(200);
- assert.equal(el('commandText').textContent,'COMPLETE','10-trial session completes');
+ for(let i=0;i<3500&&el('startBtn').disabled;i++)await step(1000);
+ assert.equal(el('commandText').textContent,'COMPLETE',`${trials}-trial session completes`);
  assert.equal(el('startBtn').disabled,false,'start re-enabled');
- assert.equal(el('validCount').textContent,10,'audio only counts completed trials');
+ assert.equal(el('validCount').textContent,trials,'audio only counts completed trials');
  assert.equal(el('avgTime').textContent,'—','audio only never shows reaction times');
  assert.equal(fetched.length,19,'all 19 source recordings requested');
  assert(fetched.every(p=>!p.includes('GO08')),'GO08 not loaded');
- if(!noAudio)assert.equal(sounds.length,10,'one recorded GO per trial');
+ if(!noAudio)assert.equal(sounds.length,trials,'one recorded GO per trial');
  else assert.equal(sounds.length,0,'fallback does not use empty buffers');
 }
 (async()=>{
  await simulate();
+ await simulate({trials:100});
  await simulate({noAudio:true});
  await simulate({stopEarly:true});
- console.log('PASS: 10-trial recorded audio, browser-speech fallback, audio-only scoring, and stop cleanup');
+ console.log('PASS: 10/100-trial recorded audio endurance, browser-speech fallback, audio-only scoring, and stop cleanup');
 })().catch(e=>{console.error(e);process.exitCode=1});
